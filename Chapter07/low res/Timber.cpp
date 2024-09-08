@@ -20,10 +20,19 @@ side branchPositions[NUM_BRANCHES];
 int main()
 {
 	// Create a video mode object
-	VideoMode vm(1920, 1080);
+	// VideoMode vm(1920, 1080);
+
+	// Low res code
+	VideoMode vm(960, 540);
 
 	// Create and open a window for the game
-	RenderWindow window(vm, "Timber!!!", Style::Default);
+	// RenderWindow window(vm, "Timber!!!", Style::Fullscreen);
+
+	// Low res code
+	RenderWindow window(vm, "Timber!!!");
+	View view(sf::FloatRect(0, 0, 1920, 1080));
+	window.setView(view);
+	//End of low res code!! Everything else is the same!!
 
 	// Create a texture to hold a graphic on the GPU
 	Texture textureBackground;
@@ -128,8 +137,8 @@ int main()
 	scoreText.setCharacterSize(100);
 
 	// Choose a color
-	messageText.setFillColor(Color::White);
-	scoreText.setFillColor(Color::White);
+	messageText.setColor(Color::White);
+	scoreText.setColor(Color::White);
 
 	// Position the text
 	FloatRect textRect = messageText.getLocalBounds();
@@ -223,7 +232,21 @@ int main()
 		Event event;
 		while (window.pollEvent(event))
 		{
-			
+			if (event.type == sf::Event::KeyPressed)
+			{
+				if (event.key.code == sf::Keyboard::F5)
+				{
+					// Capturing the window to a sf::Image
+					sf::Image screenshot = window.capture();
+
+
+					// Making the screenshot name
+					std::string screenshotName = "screenshot";
+
+					// Saving to a file
+					screenshot.saveToFile("screenshots/" + screenshotName + ".png");
+				}
+			}
 
 			if (event.type == Event::KeyReleased && !paused)
 			{

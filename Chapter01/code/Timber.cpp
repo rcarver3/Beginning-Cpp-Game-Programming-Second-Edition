@@ -10,7 +10,7 @@ int main()
 	VideoMode vm(1920, 1080);
 
 	// Create and open a window for the game
-	RenderWindow window(vm, "Timber!!!", Style::Fullscreen);
+	RenderWindow window(vm, "Timber!!!", Style::Close);
 
 	// Create a texture to hold a graphic on the GPU
 	Texture textureBackground;
