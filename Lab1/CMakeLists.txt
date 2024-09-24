@@ -11,7 +11,7 @@ set(OPENAL_LIBRARY ${PROJECT_SOURCE_DIR}/../SFML/extlibs/libs-msvc/x64/openal32.
 
 
 # Add source files
-file(GLOB SOURCES ${PROJECT_SOURCE_DIR}/code/Timber.cpp)
+file(GLOB SOURCES ${PROJECT_SOURCE_DIR}/code/Centipede.cpp)
 
 # Add the executable
 add_executable(Lab1 ${SOURCES})
@@ -34,7 +34,3 @@ file(COPY ${PROJECT_SOURCE_DIR}/fonts
      DESTINATION "${COMMON_OUTPUT_DIR}/bin")
 file(COPY ${PROJECT_SOURCE_DIR}/graphics
      DESTINATION "${COMMON_OUTPUT_DIR}/bin")
- file(COPY "${PROJECT_SOURCE_DIR}/low res"
- DESTINATION "${COMMON_OUTPUT_DIR}/bin")
- file(COPY ${PROJECT_SOURCE_DIR}/sound
- DESTINATION "${COMMON_OUTPUT_DIR}/bin")
