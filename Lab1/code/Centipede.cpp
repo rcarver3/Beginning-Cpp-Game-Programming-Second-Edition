@@ -8,13 +8,13 @@ using namespace sf;
 // Function declaration
 void updateBranches(int seed);
 
-const int NUM_BRANCHES = 30;
-Sprite branches[NUM_BRANCHES];
+const int NUM_MUSHROOMS = 30;
+Sprite mushrooms[NUM_MUSHROOMS];
 
 // Where is the player/branch? 
 // Left or Right
 enum class side { LEFT, RIGHT, NONE };
-side branchPositions[NUM_BRANCHES];
+side branchPositions_remove[NUM_MUSHROOMS];
 
 
 int main()
@@ -23,7 +23,7 @@ int main()
 	VideoMode vm(1920, 1080);
 
 	// Create and open a window for the game
-	RenderWindow window(vm, "Timber!!!", Style::Default);
+	RenderWindow window(vm, "Centipede", Style::Default);
 
 	// Create a texture to hold a graphic on the GPU
 	Texture textureBackground;
@@ -148,13 +148,13 @@ int main()
 	textureBranch.loadFromFile("graphics/branch.png");
 
 	// Set the texture for each branch sprite
-	for (int i = 0; i < NUM_BRANCHES; i++) {
-		branches[i].setTexture(textureBranch);
-		branches[i].setPosition(-2000, -2000);
+	for (int i = 0; i < NUM_MUSHROOMS; i++) {
+		mushrooms[i].setTexture(textureBranch);
+		mushrooms[i].setPosition(-2000, -2000);
 
 		// Set the sprite's origin to dead center
 		// We can then spin it round without changing its position
-		branches[i].setOrigin(220, 20);
+		mushrooms[i].setOrigin(220, 20);
 	}
 
 	// Prepare the player
@@ -258,9 +258,9 @@ int main()
 			timeRemaining = 6;
 
 			// Make all the branches disappear
-			for (int i = 1; i < NUM_BRANCHES; i++)
+			for (int i = 1; i < NUM_MUSHROOMS; i++)
 			{
-				branchPositions[i] = side::NONE;
+				branchPositions_remove[i] = side::NONE;
 			}
 
 			// Make sure the gravestone is hidden
@@ -525,32 +525,32 @@ int main()
 			scoreText.setString(ss.str());
 
 			// update the branch sprites
-			for (int i = 0; i < NUM_BRANCHES; i++)
+			for (int i = 0; i < NUM_MUSHROOMS; i++)
 			{
 
 				float height = i * 150;
 
-				if (branchPositions[i] == side::LEFT)
+				if (branchPositions_remove[i] == side::LEFT)
 				{
 					// Move the sprite to the left side
-					branches[i].setPosition(610, height);
+					mushrooms[i].setPosition(610, height);
 					// Flip the sprite round the other way
-					branches[i].setOrigin(220, 40);
-					branches[i].setRotation(180);
+					mushrooms[i].setOrigin(220, 40);
+					mushrooms[i].setRotation(180);
 				}
-				else if (branchPositions[i] == side::RIGHT)
+				else if (branchPositions_remove[i] == side::RIGHT)
 				{
 					// Move the sprite to the right side
-					branches[i].setPosition(1330, height);
+					mushrooms[i].setPosition(1330, height);
 					// Set the sprite rotation to normal
-					branches[i].setOrigin(220, 40);
-					branches[i].setRotation(0);
+					mushrooms[i].setOrigin(220, 40);
+					mushrooms[i].setRotation(0);
 
 				}
 				else
 				{
 					// Hide the branch
-					branches[i].setPosition(3000, height);
+					mushrooms[i].setPosition(3000, height);
 				}
 			}
 
@@ -573,7 +573,7 @@ int main()
 			}
 
 			// has the player been squished by a branch?
-			if (branchPositions[5] == playerSide)
+			if (branchPositions_remove[5] == playerSide)
 			{
 				// death
 				paused = true;
@@ -625,8 +625,8 @@ int main()
 		window.draw(spriteCloud3);
 
 		// Draw the branches
-		for (int i = 0; i < NUM_BRANCHES; i++) {
-			window.draw(branches[i]);
+		for (int i = 0; i < NUM_MUSHROOMS; i++) {
+			window.draw(mushrooms[i]);
 		}
 
 		// Draw the tree
@@ -673,8 +673,8 @@ int main()
 void updateBranches(int seed)
 {
 	// Move all the branches down one place
-	for (int j = NUM_BRANCHES - 1; j > 0; j--) {
-		branchPositions[j] = branchPositions[j - 1];
+	for (int j = NUM_MUSHROOMS - 1; j > 0; j--) {
+		branchPositions_remove[j] = branchPositions_remove[j - 1];
 	}
 
 	// Spawn a new branch at position 0
@@ -684,15 +684,15 @@ void updateBranches(int seed)
 
 	switch (r) {
 	case 0:
-		branchPositions[0] = side::LEFT;
+		branchPositions_remove[0] = side::LEFT;
 		break;
 
 	case 1:
-		branchPositions[0] = side::RIGHT;
+		branchPositions_remove[0] = side::RIGHT;
 		break;
 
 	default:
-		branchPositions[0] = side::NONE;
+		branchPositions_remove[0] = side::NONE;
 		break;
 	}
 
