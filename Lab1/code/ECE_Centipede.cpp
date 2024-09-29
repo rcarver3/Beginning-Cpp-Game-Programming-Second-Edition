@@ -27,10 +27,10 @@ private:
         textureCentipedeBody.loadFromFile("graphics/CentipedeBody.png");
 
         bodyParts[0].setTexture(textureCentipedeHead);
-        bodyParts[0].setPosition(bodyParts.size() * followDistance, 100);
+        bodyParts[0].setPosition(0, 400);
         for (int i = 1; i < bodyParts.size(); i++) {
             bodyParts[i].setTexture(textureCentipedeBody);
-            bodyParts[i].setPosition(i * followDistance, 100);
+            bodyParts[i].setPosition(i * followDistance, 400);
         }
     }
 
