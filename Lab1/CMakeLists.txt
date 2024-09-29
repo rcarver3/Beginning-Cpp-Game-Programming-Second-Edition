@@ -11,7 +11,7 @@ set(OPENAL_LIBRARY ${PROJECT_SOURCE_DIR}/../SFML/extlibs/libs-msvc/x64/openal32.
 
 
 # Add source files
-file(GLOB SOURCES ${PROJECT_SOURCE_DIR}/code/CentipedeMotion.cpp)
+file(GLOB SOURCES ${PROJECT_SOURCE_DIR}/code/*.cpp)
 
 # Add the executable
 add_executable(Lab1 ${SOURCES})

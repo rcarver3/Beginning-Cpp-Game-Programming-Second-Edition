@@ -1,10 +1,10 @@
 // Include important C++ libraries here
 #include <sstream>
 #include <SFML/Graphics.hpp>
-#include <SFML/Audio.hpp>
 
 // Make code easier to type with "using namespace"
 using namespace sf;
+
 // Function declaration
 void updateBranches(int seed);
 
@@ -19,40 +19,32 @@ side branchPositions_remove[NUM_MUSHROOMS];
 
 int main()
 {
-	// Create a video mode object
-	VideoMode vm(1920, 1080);
-
 	// Create and open a window for the game
-	RenderWindow window(vm, "Centipede", Style::Default);
-
-	// Create a texture to hold a graphic on the GPU
-	Texture textureBackground;
-
-	// Load a graphic into the texture
-	textureBackground.loadFromFile("graphics/background.png");
+	RenderWindow window(VideoMode(1920, 1080), "Centipede", Style::Default);
 
 	// Create a sprite
 	Sprite spriteBackground;
 
 	// Attach the texture to the sprite
-	spriteBackground.setTexture(textureBackground);
+	spriteBackground.setColor(Color::Black);
 
 	// Set the spriteBackground to cover the screen
+	spriteBackground.setScale(1920, 1080);
 	spriteBackground.setPosition(0, 0);
 
 	// Make a tree sprite
-	Texture textureTree;
-	textureTree.loadFromFile("graphics/tree.png");
-	Sprite spriteTree;
-	spriteTree.setTexture(textureTree);
-	spriteTree.setPosition(810, 0);
+	Texture textureStarship;
+	textureStarship.loadFromFile("graphics/Starship.png");
+	Sprite spriteStarship;
+	spriteStarship.setTexture(textureStarship);
+	spriteStarship.setPosition(1920 / 2, 200);
 
 	// Prepare the bee
-	Texture textureBee;
-	textureBee.loadFromFile("graphics/bee.png");
-	Sprite spriteBee;
-	spriteBee.setTexture(textureBee);
-	spriteBee.setPosition(0, 800);
+	Texture textureSpider;
+	textureSpider.loadFromFile("graphics/spider.png");
+	Sprite spriteSpider;
+	spriteSpider.setTexture(textureSpider);
+	spriteSpider.setPosition(0, 800);
 
 	// Is the bee currently moving?
 	bool beeActive = false;
@@ -113,7 +105,7 @@ int main()
 
 	// We need to choose a font
 	sf::Font font;
-	font.loadFromFile("fonts/KOMIKAP_.ttf");
+	font.loadFromFile("fonts/JOKERMAN.ttf");
 
 	// Set the font to our message
 	messageText.setFont(font);
@@ -199,23 +191,6 @@ int main()
 	
 	// Control the player input
 	bool acceptInput = false;
-
-	// Prepare the sound
-	SoundBuffer chopBuffer;
-	chopBuffer.loadFromFile("sound/chop.wav");
-	Sound chop;
-	chop.setBuffer(chopBuffer);
-
-	SoundBuffer deathBuffer;
-	deathBuffer.loadFromFile("sound/death.wav");
-	Sound death;
-	death.setBuffer(deathBuffer);
-
-	// Out of time
-	SoundBuffer ootBuffer;
-	ootBuffer.loadFromFile("sound/out_of_time.wav");
-	Sound outOfTime;
-	outOfTime.setBuffer(ootBuffer);
 	
 	while (window.isOpen())
 	{
@@ -308,9 +283,6 @@ int main()
 
 				acceptInput = false;
 
-				// Play a chop sound
-				chop.play();
-
 			}
 
 			// Handle the left cursor key
@@ -340,9 +312,6 @@ int main()
 
 
 				acceptInput = false;
-
-				// Play a chop sound
-				chop.play();
 
 			}
 
@@ -384,11 +353,6 @@ int main()
 					textRect.height / 2.0f);
 
 				messageText.setPosition(1920 / 2.0f, 1080 / 2.0f);
-
-				// Play the out of time sound
-				outOfTime.play();
-
-
 			}
 
 
@@ -403,7 +367,7 @@ int main()
 				// How high is the bee
 				srand((int)time(0) * 10);
 				float height = (rand() % 500) + 500;
-				spriteBee.setPosition(2000, height);
+				spriteSpider.setPosition(2000, height);
 				beeActive = true;
 
 			}
@@ -411,13 +375,13 @@ int main()
 				// Move the bee
 			{
 
-				spriteBee.setPosition(
-					spriteBee.getPosition().x -
+				spriteSpider.setPosition(
+					spriteSpider.getPosition().x -
 					(beeSpeed * dt.asSeconds()),
-					spriteBee.getPosition().y);
+					spriteSpider.getPosition().y);
 
 				// Has the bee reached the right hand edge of the screen?
-				if (spriteBee.getPosition().x < -100)
+				if (spriteSpider.getPosition().x < -100)
 				{
 					// Set it up ready to be a whole new cloud next frame
 					beeActive = false;
@@ -598,10 +562,6 @@ int main()
 				messageText.setPosition(1920 / 2.0f,
 					1080 / 2.0f);
 
-				// Play the death sound
-				death.play();
-
-
 			}
 
 
@@ -630,7 +590,7 @@ int main()
 		}
 
 		// Draw the tree
-		window.draw(spriteTree);
+		window.draw(spriteStarship);
 		// Draw the player
 		window.draw(spritePlayer);
 
@@ -645,7 +605,7 @@ int main()
 
 
 		// Drawraw the bee
-		window.draw(spriteBee);
+		window.draw(spriteSpider);
 
 		// Draw the score
 		window.draw(scoreText);
