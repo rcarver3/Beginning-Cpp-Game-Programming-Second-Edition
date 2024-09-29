@@ -20,10 +20,10 @@ int main() {
     // Window setup
     RenderWindow window(VideoMode(800, 600), "Particle Chain Movement");
 
-    const int numParticles = 10;
+    const int numParticles = 20;
     const float particleRadius = 10.f;
     const float speed = 200.f;
-    const float followDistance = 30.f; // Distance each particle tries to maintain from the one in front
+    const float followDistance = 20.f; // Distance each particle tries to maintain from the one in front
 
     // Create particles (lead particle + followers)
     std::vector<CircleShape> particles(numParticles);
@@ -35,7 +35,8 @@ int main() {
     }
 
     Clock clock;
-
+    float elapsedTime = 0.f;
+    
     // Main loop
     while (window.isOpen()) {
         Event event;
@@ -44,32 +45,47 @@ int main() {
                 window.close();
         }
 
-        // Time delta for smooth movement
+        // Close on escape key press
+        if (Keyboard::isKeyPressed(Keyboard::Escape)) {
+            window.close();
+        }
+
+        // Time delta for determining update rate
         float deltaTime = clock.restart().asSeconds();
 
-        // Control the lead particle (the first one)
-        if (Keyboard::isKeyPressed(Keyboard::Up)) {
-            particles[0].move(0, -speed * deltaTime);
-        }
-        if (Keyboard::isKeyPressed(Keyboard::Down)) {
-            particles[0].move(0, speed * deltaTime);
-        }
-        if (Keyboard::isKeyPressed(Keyboard::Left)) {
-            particles[0].move(-speed * deltaTime, 0);
-        }
-        if (Keyboard::isKeyPressed(Keyboard::Right)) {
-            particles[0].move(speed * deltaTime, 0);
-        }
+        // Velocity vector for determining change
+        Vector2f velocity = Vector2f(0.f, 0.f);
 
-        // For each particle except the lead one, make it follow the one ahead
-        for (int i = 1; i < numParticles; ++i) {
-            Vector2f dir = particles[i - 1].getPosition() - particles[i].getPosition();
-            float dist = distance(particles[i - 1].getPosition(), particles[i].getPosition());
-
-            if (dist > followDistance) {
-                // Normalize the direction vector and move the particle towards the one ahead
-                particles[i].move(normalize(dir) * (speed * deltaTime));
+        // If enough time has passed for 5 fps:
+        if (elapsedTime >= 0.2f) {
+            // Velocity vector value depends on key pressed
+            if (Keyboard::isKeyPressed(Keyboard::Up)) {
+                velocity = Vector2f(0.f, followDistance * -1);
             }
+            if (Keyboard::isKeyPressed(Keyboard::Down)) {
+                velocity = Vector2f(0.f, followDistance);
+            }
+            if (Keyboard::isKeyPressed(Keyboard::Left)) {
+                velocity = Vector2f(followDistance * -1, 0.f);
+            }
+            if (Keyboard::isKeyPressed(Keyboard::Right)) {
+                velocity = Vector2f(followDistance, 0.f);
+            }
+
+            // If velocity is not 0, for each particle except
+            // the lead one, make it follow the one ahead
+            if (velocity != Vector2f(0.f, 0.f)) {
+                for (int i = particles.size() - 1; i > 0; i--) {
+                    particles[i].setPosition(particles[i - 1].getPosition());
+                }
+                // Finally, move the lead particle by velocity amount
+                particles[0].move(velocity);
+            }
+            // Reset elapsed time
+            elapsedTime = 0.f;
+        }
+        else {        
+            elapsedTime += deltaTime;
         }
 
         // Rendering
