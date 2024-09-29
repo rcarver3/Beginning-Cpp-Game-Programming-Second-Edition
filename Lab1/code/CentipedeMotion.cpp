@@ -2,21 +2,23 @@
 #include <cmath>
 #include <vector>
 
+using namespace sf;
+
 // Function to calculate the distance between two points
-float distance(sf::Vector2f a, sf::Vector2f b) {
+float distance(Vector2f a, Vector2f b) {
     return std::sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y));
 }
 
 // Function to normalize a vector
-sf::Vector2f normalize(sf::Vector2f v) {
+Vector2f normalize(Vector2f v) {
     float mag = std::sqrt(v.x * v.x + v.y * v.y);
-    if (mag == 0) return sf::Vector2f(0, 0);
-    return sf::Vector2f(v.x / mag, v.y / mag);
+    if (mag == 0) return Vector2f(0, 0);
+    return Vector2f(v.x / mag, v.y / mag);
 }
 
 int main() {
     // Window setup
-    sf::RenderWindow window(sf::VideoMode(800, 600), "Particle Chain Movement");
+    RenderWindow window(VideoMode(800, 600), "Particle Chain Movement");
 
     const int numParticles = 10;
     const float particleRadius = 10.f;
@@ -24,21 +26,21 @@ int main() {
     const float followDistance = 30.f; // Distance each particle tries to maintain from the one in front
 
     // Create particles (lead particle + followers)
-    std::vector<sf::CircleShape> particles(numParticles);
+    std::vector<CircleShape> particles(numParticles);
     for (int i = 0; i < numParticles; ++i) {
         particles[i].setRadius(particleRadius);
-        particles[i].setFillColor(sf::Color::White);
+        particles[i].setFillColor(Color::White);
         particles[i].setOrigin(particleRadius, particleRadius); // Center origin for proper movement
         particles[i].setPosition(400.f, 300.f + i * followDistance); // Position them initially in a vertical line
     }
 
-    sf::Clock clock;
+    Clock clock;
 
     // Main loop
     while (window.isOpen()) {
-        sf::Event event;
+        Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
+            if (event.type == Event::Closed)
                 window.close();
         }
 
@@ -46,22 +48,22 @@ int main() {
         float deltaTime = clock.restart().asSeconds();
 
         // Control the lead particle (the first one)
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        if (Keyboard::isKeyPressed(Keyboard::Up)) {
             particles[0].move(0, -speed * deltaTime);
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+        if (Keyboard::isKeyPressed(Keyboard::Down)) {
             particles[0].move(0, speed * deltaTime);
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+        if (Keyboard::isKeyPressed(Keyboard::Left)) {
             particles[0].move(-speed * deltaTime, 0);
         }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+        if (Keyboard::isKeyPressed(Keyboard::Right)) {
             particles[0].move(speed * deltaTime, 0);
         }
 
         // For each particle except the lead one, make it follow the one ahead
         for (int i = 1; i < numParticles; ++i) {
-            sf::Vector2f dir = particles[i - 1].getPosition() - particles[i].getPosition();
+            Vector2f dir = particles[i - 1].getPosition() - particles[i].getPosition();
             float dist = distance(particles[i - 1].getPosition(), particles[i].getPosition());
 
             if (dist > followDistance) {
