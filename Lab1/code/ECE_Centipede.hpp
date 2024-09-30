@@ -9,7 +9,7 @@ public:
     const float particleRadius = 10.f;
     const float speed = 200.f;
     const float followDistance = 20.f;
-    vector<Sprite> bodyParts;
+    const int initialCount = 12;
 
     enum class direction {
         NONE,
@@ -20,29 +20,31 @@ public:
     };
 
 private:
-    void initialize() {
+    vector<Sprite> bodyParts;
+
+    void initialize(Vector2f position) {
         Texture textureCentipedeHead;
         Texture textureCentipedeBody;
         textureCentipedeHead.loadFromFile("graphics/CentipedeHead.png");
         textureCentipedeBody.loadFromFile("graphics/CentipedeBody.png");
 
         bodyParts[0].setTexture(textureCentipedeHead);
-        bodyParts[0].setPosition(0, 400);
+        bodyParts[0].setPosition(position);
         for (int i = 1; i < bodyParts.size(); i++) {
             bodyParts[i].setTexture(textureCentipedeBody);
-            bodyParts[i].setPosition(i * followDistance, 400);
+            bodyParts[i].setPosition(position.x - (i * followDistance), position.y);
         }
     }
 
 public:
     ECE_Centipede() {
-        vector<Sprite> bodyParts(12);
-        initialize();
+        bodyParts.assign(12, Sprite());
+        initialize(Vector2f(400, 200));
     }
 
-    ECE_Centipede(int numP) {
-        vector<Sprite> bodyParts(numP);
-        initialize();
+    ECE_Centipede(int numP, Vector2f position) {
+        bodyParts.assign(numP, Sprite());
+        initialize(position);
     }
 
     void moveCentipede(direction dir = direction::NONE) {
@@ -67,6 +69,7 @@ public:
             velocity = Vector2f(0.f, 0.f);
             break;
         }
+
         // If dir is not NONE, for each particle except
         // the lead one make it follow the one ahead
         if (velocity != Vector2f(0.f, 0.f)) {

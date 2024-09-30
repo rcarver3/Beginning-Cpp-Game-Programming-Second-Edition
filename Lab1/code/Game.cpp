@@ -122,10 +122,7 @@ int main()
 		mushrooms.insert({ pair(position.x, position.y), oneMushroom });
 	}
 
-	// Some other useful log related variables
-	bool logActive = false;
-	float logSpeedX = 1000;
-	float logSpeedY = -1500;
+	vector<ECE_Centipede> centipedes(1, ECE_Centipede());
 	
 	// Control the player input
 	bool acceptInput = false;
