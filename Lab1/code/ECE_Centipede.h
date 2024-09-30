@@ -15,8 +15,10 @@ private:
 
     void initialize(Vector2f position) {
         bodyParts[0].setPosition(position);
+        bodyParts[0].setTextureRect(IntRect(Vector2i(0, 0), Vector2i(23, 24)));
         for (int i = 1; i < bodyParts.size(); i++) {
             bodyParts[i].setPosition(position.x - (i * followDistance), position.y);
+            bodyParts[i].setTextureRect(IntRect(Vector2i(0, 0), Vector2i(23, 24)));
         }
     }
 
@@ -54,7 +56,7 @@ private:
 public:
     ECE_Centipede() {
         bodyParts.assign(initialCount, Sprite());
-        initialize(Vector2f(400, 200));
+        initialize(Vector2f(300, 110));
     }
 
     ECE_Centipede(int num, Vector2f position) {
@@ -68,44 +70,38 @@ public:
 
     direction moveCentipede(direction prev) {
         bool down = true, left = true, right = true;
-        Vector2f prevPos = bodyParts[0].getPosition();
-        if (bodyParts[0].getTextureRect().intersects(SCREEN_BOUNDARY)) {
-            if (bodyParts[0].getPosition().x > X_RESOLUTION * 0.5) {
-                right = false;
-            }
-            else {
-                left = false;
-            }
-        }
+        Sprite head = bodyParts[0];
+        FloatRect boundary = head.getGlobalBounds();
+        Vector2f prevPos = head.getPosition();
 
         for (int i = 0; i < mushrooms.size(); i++) {
-            IntRect mushroomBox = IntRect(mushrooms[i].spriteMushroom.getGlobalBounds());
+            FloatRect mushroomBox = mushrooms[i].spriteMushroom.getGlobalBounds();
 
             // Explore right
             if (right) {
-                bodyParts[0].move(followDistance, 0);
-                if (bodyParts[0].getTextureRect().intersects(mushroomBox)) {
+                head.move(followDistance, 0);
+                if (boundary.intersects(mushroomBox) || head.getPosition().x >= X_RESOLUTION) {
                     right = false;
                 }
-                bodyParts[0].setPosition(prevPos);
+                head.setPosition(prevPos);
             }
 
             // Explore down
             if (down) {
-                bodyParts[0].move(0, followDistance);
-                if (bodyParts[0].getTextureRect().intersects(mushroomBox)) {
+                head.move(0, followDistance);
+                if (boundary.intersects(mushroomBox)) {
                     down = false;
                 }
-                bodyParts[0].setPosition(prevPos);
+                head.setPosition(prevPos);
             }
 
             // Explore left
             if (left) {
-                bodyParts[0].move(followDistance * -1, 0);
-                if (bodyParts[0].getTextureRect().intersects(mushroomBox)) {
+                head.move(followDistance * -1, 0);
+                if (boundary.intersects(mushroomBox) || head.getPosition().x <= 0) {
                     left = false;
                 }
-                bodyParts[0].setPosition(prevPos);
+                head.setPosition(prevPos);
             }
         }
 

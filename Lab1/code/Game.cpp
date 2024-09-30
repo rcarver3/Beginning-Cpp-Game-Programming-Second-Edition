@@ -6,7 +6,7 @@ using namespace std;
 
 int main() {
 	// Create and open a window for the game
-	RenderWindow window(VideoMode(X_RESOLUTION, Y_RESOLUTION), "Centipede", Style::Fullscreen);
+	RenderWindow window(VideoMode(X_RESOLUTION, Y_RESOLUTION), "Centipede", Style::Default);
 
 	// Create a background sprite
 	Sprite spriteBackground;
@@ -35,6 +35,9 @@ int main() {
 	startupScreenTexture.loadFromFile("graphics/startup.png");
 	Sprite startupScreenSprite;
 	startupScreenSprite.setTexture(startupScreenTexture);
+	float x = (startupScreenTexture.getSize().x > X_RESOLUTION) ? ((float)X_RESOLUTION / startupScreenTexture.getSize().x) : (startupScreenTexture.getSize().x / (float)X_RESOLUTION);
+	float y = (startupScreenTexture.getSize().y > Y_RESOLUTION) ? ((float)Y_RESOLUTION / startupScreenTexture.getSize().y) : (startupScreenTexture.getSize().y / (float)Y_RESOLUTION);
+	startupScreenSprite.setScale(x, y);
 	startupScreenSprite.setPosition(0, 0);
 
 	// Create bottom and top of screen
@@ -48,8 +51,8 @@ int main() {
 	screenTop.setFillColor(DARK_YELLOW);
 	screenTop.setPosition(0, 0);
 
-	Time gameTimeTotal;
-	float timeRemaining = 6.0f;
+	Clock clock;
+	float elapsedTime = 0.f;
 
 	// Track whether the game is running
 	bool paused = true;
@@ -97,6 +100,7 @@ int main() {
 	Texture textureCentipedeBody;
 	textureCentipedeHead.loadFromFile("graphics/CentipedeHead.png");
 	textureCentipedeBody.loadFromFile("graphics/CentipedeBody.png");
+	direction prevDir = direction::RIGHT;
 
 	// Control the player input
 	bool acceptInput = false;
@@ -139,7 +143,6 @@ int main() {
 
 				// Reset the time and the score
 				score = 0;
-				timeRemaining = 6;
 
 				// Make all the branches disappear
 			/*	for (int i = 1; i < NUM_MUSHROOMS; i++)
@@ -231,30 +234,26 @@ int main() {
 			window.clear();
 			window.draw(startupScreenSprite);
 		} else {
-			//// Measure time
-			//Clock clock;
-			//Time deltaTime = clock.restart();
+			// Measure time
+			float deltaTime = clock.restart().asSeconds();
 
-			//float elapsedTime = 0.f;
-
-			//// If enough time has passed for 5 fps:
-			//if (elapsedTime >= 0.2f) {
-			//	for (int i = 0; i < centipedes.size(); i++) {
-			//		// Velocity vector value depends on key pressed
-			//		centipedes[i].moveCentipede(&mushrooms);
-
-
-			//		// Reset elapsed time
-			//		elapsedTime = 0.f;
-			//	}
-			//}
+			// If enough time has passed for 5 fps:
+			if (elapsedTime >= 0.2f) {
+				for (int i = 0; i < centipedes.size(); i++) {
+					prevDir = centipedes[i].moveCentipede(prevDir);
+					elapsedTime = 0.f;
+				}
+			}
+			else {
+				elapsedTime += deltaTime;
+			}
 		
 
-		 /*
-		 ****************************************
-		 Draw the scene
-		 ****************************************
-		 */
+			 /*
+			 ****************************************
+			 Draw the scene
+			 ****************************************
+			 */
 			window.clear();
 
 			// Draw our game scene here

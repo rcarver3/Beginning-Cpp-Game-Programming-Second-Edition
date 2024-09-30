@@ -5,6 +5,7 @@
 #include <random>
 #include <list>
 #include <chrono>
+#include <cmath>
 
 enum class state {
 	EMPTY,
@@ -28,11 +29,12 @@ struct mushroom {
 const int NUM_MUSHROOMS = 30;
 const int NUM_LIVES = 3;
 
-const int X_RESOLUTION = 1920;
+const int X_RESOLUTION = 1080;
 const int Y_RESOLUTION = 1080;
 
 extern std::vector<mushroom> mushrooms(NUM_MUSHROOMS);
+// extern sf::FloatRect head_bounding_box;
 
 const sf::Color DARK_YELLOW = sf::Color(112, 119, 24);
 
-const sf::IntRect SCREEN_BOUNDARY = sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(X_RESOLUTION, Y_RESOLUTION));
+// const sf::FloatRect SCREEN_BOUNDARY = sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(X_RESOLUTION, Y_RESOLUTION));
