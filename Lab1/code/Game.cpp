@@ -20,18 +20,10 @@ struct mushroom {
 	state currentState;
 };
 
-struct vector2Comparator {
-	bool operator() (Vector2f x, Vector2f y) const {
-		return x == y;
-	}
-};
-
 // Function declaration
-void updateBranches(int seed);
+// void updateBranches(int seed);
 
 const int NUM_MUSHROOMS = 30;
-
-map<pair<float, float>, mushroom> mushrooms;
 
 // Where is the player/branch? 
 // Left or Right
@@ -42,7 +34,7 @@ map<pair<float, float>, mushroom> mushrooms;
 int main()
 {
 	// Create and open a window for the game
-	RenderWindow window(VideoMode(1920, 1080), "Centipede", Style::Default);
+	RenderWindow window(VideoMode(1920, 1080), "Centipede", Style::Fullscreen);
 
 	// Create a sprite
 	Sprite spriteBackground;
@@ -59,7 +51,8 @@ int main()
 	textureStarship.loadFromFile("graphics/Starship.png");
 	Sprite spriteStarship;
 	spriteStarship.setTexture(textureStarship);
-	spriteStarship.setPosition(1920 / 2, 200);
+	printf("x: %d\ny: %d", spriteStarship.getTextureRect().getSize().x, spriteStarship.getTextureRect().getSize().y);
+	spriteStarship.setPosition(960, 1000);
 
 	// Prepare the bee
 	Texture textureSpider;
@@ -86,17 +79,20 @@ int main()
 
 	// Variables to control time itself
 	Clock clock;
-	// Time bar
-	RectangleShape timeBar;
-	float timeBarStartWidth = 400;
-	float timeBarHeight = 80;
-	timeBar.setSize(Vector2f(timeBarStartWidth, timeBarHeight));
-	timeBar.setFillColor(Color::Red);
-	timeBar.setPosition((1920 / 2) - timeBarStartWidth / 2, 980);
+
+	// Bottom and top of screen
+	RectangleShape screenBottom;
+	screenBottom.setSize(Vector2f(1920, 100));
+	screenBottom.setFillColor(Color::Yellow);
+	screenBottom.setPosition(0, 980);
+
+	RectangleShape screenTop;
+	screenTop.setSize(Vector2f(1920, 100));
+	screenTop.setFillColor(Color::Yellow);
+	screenTop.setPosition(0, 0);
 
 	Time gameTimeTotal;
 	float timeRemaining = 6.0f;
-	float timeBarWidthPerSecond = timeBarStartWidth / timeRemaining;
 
 	// Track whether the game is running
 	bool paused = true;
@@ -147,7 +143,9 @@ int main()
 	Texture textureMushroom;
 	textureMushroom.loadFromFile("graphics/Mushroom0.png");
 
-	// Set the texture for each branch sprite
+	map<pair<float, float>, mushroom> mushrooms;
+
+	// Initialize each mushroom into the map
 	for (int i = 0; i < NUM_MUSHROOMS; i++) {
 		Vector2f position = Vector2f(mushroomPositionX(generator), mushroomPositionY(generator));
 		mushroom oneMushroom;
@@ -301,9 +299,6 @@ int main()
 
 			// Subtract from the amount of time remaining
 			timeRemaining -= dt.asSeconds();
-			// size up the time bar
-			timeBar.setSize(Vector2f(timeBarWidthPerSecond *
-				timeRemaining, timeBarHeight));
 
 
 			if (timeRemaining <= 0.0f) {
@@ -548,6 +543,10 @@ int main()
 		// Draw our game scene here
 		window.draw(spriteBackground);
 
+		// Draw the screen bottom and top
+		window.draw(screenBottom);
+		window.draw(screenTop);
+
 		// Draw the clouds
 		/*window.draw(spriteCloud1);
 		window.draw(spriteCloud2);
@@ -567,8 +566,6 @@ int main()
 		// Draw the score
 		window.draw(scoreText);
 
-		// Draw the timebar
-		window.draw(timeBar);
 
 		// Iterate over map and draw mushrooms
 		map<pair<float, float>, mushroom>::iterator it;
