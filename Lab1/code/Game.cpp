@@ -5,6 +5,7 @@
 #include <vector>
 #include <random>
 #include <list>
+#include <chrono>
 
 // Make code easier to type with "using namespace"
 using namespace sf;
@@ -50,8 +51,9 @@ int main()
 	Texture textureStarship;
 	textureStarship.loadFromFile("graphics/Starship.png");
 	Sprite spriteStarship;
+	spriteStarship.setScale(Vector2f(1.5, 1.5));
 	spriteStarship.setTexture(textureStarship);
-	printf("x: %d\ny: %d", spriteStarship.getTextureRect().getSize().x, spriteStarship.getTextureRect().getSize().y);
+	spriteStarship.setOrigin(Vector2f(7, 11));
 	spriteStarship.setPosition(960, 1000);
 
 	// Prepare the bee
@@ -136,8 +138,9 @@ int main()
 
 	// Random position generator
 	default_random_engine generator;
+	generator.seed(chrono::system_clock::now().time_since_epoch().count());
 	uniform_int_distribution mushroomPositionX(0, 1920);
-	uniform_int_distribution mushroomPositionY(0, 1080);
+	uniform_int_distribution mushroomPositionY(120, 960);
 
 	// Prepare two different textures for mushroom
 	Texture textureMushroom;
@@ -151,7 +154,7 @@ int main()
 		mushroom oneMushroom;
 		oneMushroom.spriteMushroom.setTexture(textureMushroom);
 		oneMushroom.currentState = state::HEALTHY_MUSHROOM;
-		oneMushroom.spriteMushroom.setOrigin(13, 13);
+		oneMushroom.spriteMushroom.setOrigin(11, 12);
 		oneMushroom.spriteMushroom.setPosition(position);
 
 		mushrooms.insert({ pair(position.x, position.y), oneMushroom });
