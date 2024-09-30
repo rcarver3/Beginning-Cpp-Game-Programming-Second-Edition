@@ -11,7 +11,7 @@ set(OPENAL_LIBRARY ${PROJECT_SOURCE_DIR}/../SFML/extlibs/libs-msvc/x64/openal32.
 
 
 # Add source files
-file(GLOB SOURCES ${PROJECT_SOURCE_DIR}/code/*.cpp)
+file(GLOB SOURCES ${PROJECT_SOURCE_DIR}/code/*)
 
 # Add the executable
 add_executable(Lab1 ${SOURCES})
@@ -28,8 +28,6 @@ set_target_properties(
     VS_DEBUGGER_WORKING_DIRECTORY "${COMMON_OUTPUT_DIR}/bin"
 )
 # Copy DLLs using file(COPY ...)
-file(COPY ${PROJECT_SOURCE_DIR}/../SFML/extlibs/bin/x64/openal32.dll
-     DESTINATION "${COMMON_OUTPUT_DIR}/bin")
 file(COPY ${PROJECT_SOURCE_DIR}/fonts
      DESTINATION "${COMMON_OUTPUT_DIR}/bin")
 file(COPY ${PROJECT_SOURCE_DIR}/graphics
