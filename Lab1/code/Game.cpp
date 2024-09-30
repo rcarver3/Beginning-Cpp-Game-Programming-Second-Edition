@@ -23,16 +23,22 @@ struct mushroom {
 };
 
 const int NUM_MUSHROOMS = 30;
+const int NUM_LIVES = 3;
+
+const int X_RESOLUTION = 1920;
+const int Y_RESOLUTION = 1080;
+
+const Color darkYellow = Color(112, 119, 24);
 
 int main()
 {
 	// Create and open a window for the game
-	RenderWindow window(VideoMode(1920, 1080), "Centipede", Style::Fullscreen);
+	RenderWindow window(VideoMode(X_RESOLUTION, Y_RESOLUTION), "Centipede", Style::Fullscreen);
 
 	// Create a background sprite
 	Sprite spriteBackground;
 	spriteBackground.setColor(Color::Black);
-	spriteBackground.setScale(1920, 1080);
+	spriteBackground.setScale(X_RESOLUTION, Y_RESOLUTION);
 	spriteBackground.setPosition(0, 0);
 
 	// Make a starship sprite
@@ -42,27 +48,27 @@ int main()
 	spriteStarship.setScale(Vector2f(1.5, 1.5));
 	spriteStarship.setTexture(textureStarship);
 	spriteStarship.setOrigin(Vector2f(7, 11));
-	spriteStarship.setPosition(960, 1000);
+	spriteStarship.setPosition(X_RESOLUTION * 0.5, Y_RESOLUTION * 0.95);
 
 	// Make a spider sprite
 	Texture textureSpider;
 	textureSpider.loadFromFile("graphics/spider.png");
 	Sprite spriteSpider;
 	spriteSpider.setTexture(textureSpider);
-	spriteSpider.setPosition(0, 800);
+	spriteSpider.setPosition(0, Y_RESOLUTION * 0.75);
 
 	// Variables to control time itself
 	Clock clock;
 
 	// Bottom and top of screen
 	RectangleShape screenBottom;
-	screenBottom.setSize(Vector2f(1920, 100));
-	screenBottom.setFillColor(Color::Yellow);
-	screenBottom.setPosition(0, 980);
+	screenBottom.setSize(Vector2f(X_RESOLUTION, Y_RESOLUTION * 0.1));
+	screenBottom.setFillColor(darkYellow);
+	screenBottom.setPosition(0, Y_RESOLUTION * 0.9);
 
 	RectangleShape screenTop;
-	screenTop.setSize(Vector2f(1920, 100));
-	screenTop.setFillColor(Color::Yellow);
+	screenTop.setSize(Vector2f(X_RESOLUTION, Y_RESOLUTION * 0.1));
+	screenTop.setFillColor(darkYellow);
 	screenTop.setPosition(0, 0);
 
 	Time gameTimeTotal;
@@ -70,43 +76,38 @@ int main()
 
 	// Track whether the game is running
 	bool paused = true;
-	// Draw some text
-	int score = 0;
 
+
+	int score = 0;
 	sf::Text scoreText;
 
-	// We need to choose a font
 	sf::Font font;
 	font.loadFromFile("fonts/SEGOEPRB.TTF");
-
-	// Set the font to our message
 	scoreText.setFont(font);
-
-	// Assign the actual message
-	scoreText.setString("Score = 0");
-
-	// Make it really big
-	scoreText.setCharacterSize(100);
-
-	// Choose a color
+	scoreText.setString(to_string(score));
+	scoreText.setOrigin(scoreText.getScale() * 0.5f);
+	scoreText.setCharacterSize(50);
 	scoreText.setFillColor(Color::White);
+	scoreText.setPosition(X_RESOLUTION * 0.5, Y_RESOLUTION * 0.02);
 
-	// Position the text
-	scoreText.setPosition(20, 20);
+	vector<Sprite> lives(NUM_LIVES);
+	for (int i = 0; i < NUM_LIVES; i++) {
+		lives[i].setTexture(textureStarship);
+		lives[i].setScale(Vector2f(2, 2));
+		lives[i].setOrigin(lives[i].getScale() * 0.5f);
+		lives[i].setPosition(X_RESOLUTION * 0.75 + (i * 50), (Y_RESOLUTION * 0.02) + 10);
+	}
 
 	// Random position generator
 	default_random_engine generator;
 	generator.seed(chrono::system_clock::now().time_since_epoch().count());
-	uniform_int_distribution mushroomPositionX(0, 1920);
-	uniform_int_distribution mushroomPositionY(120, 960);
-
-	// Prepare two different textures for mushroom
-	Texture textureMushroom;
-	textureMushroom.loadFromFile("graphics/Mushroom0.png");
-
-	map<pair<float, float>, mushroom> mushrooms;
+	uniform_int_distribution mushroomPositionX(0, X_RESOLUTION);
+	uniform_int_distribution mushroomPositionY((int)(Y_RESOLUTION * 0.11), (int)(Y_RESOLUTION * 0.88));
 
 	// Initialize each mushroom into the map
+	Texture textureMushroom;
+	textureMushroom.loadFromFile("graphics/Mushroom0.png");
+	map<pair<float, float>, mushroom> mushrooms;
 	for (int i = 0; i < NUM_MUSHROOMS; i++) {
 		Vector2f position = Vector2f(mushroomPositionX(generator), mushroomPositionY(generator));
 		mushroom oneMushroom;
@@ -114,7 +115,6 @@ int main()
 		oneMushroom.currentState = state::HEALTHY_MUSHROOM;
 		oneMushroom.spriteMushroom.setOrigin(11, 12);
 		oneMushroom.spriteMushroom.setPosition(position);
-
 		mushrooms.insert({ pair(position.x, position.y), oneMushroom });
 	}
 
@@ -520,6 +520,11 @@ int main()
 		map<pair<float, float>, mushroom>::iterator it;
 		for (it = mushrooms.begin(); it != mushrooms.end(); it++) {
 			window.draw(it->second.spriteMushroom);
+		}
+
+		// Draw lives in the corner
+		for (int i = 0; i < NUM_LIVES; i++) {
+			window.draw(lives[i]);
 		}
 
 		if (paused)
