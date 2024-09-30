@@ -45,9 +45,9 @@ int main()
 	Texture textureStarship;
 	textureStarship.loadFromFile("graphics/Starship.png");
 	Sprite spriteStarship;
-	spriteStarship.setScale(Vector2f(1.5, 1.5));
 	spriteStarship.setTexture(textureStarship);
-	spriteStarship.setOrigin(Vector2f(7, 11));
+	spriteStarship.setOrigin(spriteStarship.getLocalBounds().getSize() * 0.5f);
+	spriteStarship.setScale(Vector2f(2, 2));
 	spriteStarship.setPosition(X_RESOLUTION * 0.5, Y_RESOLUTION * 0.95);
 
 	// Make a spider sprite
@@ -59,8 +59,13 @@ int main()
 
 	// Variables to control time itself
 	Clock clock;
+	Texture startupScreenTexture;
+	startupScreenTexture.loadFromFile("graphics/startup.png");
+	Sprite startupScreenSprite;
+	startupScreenSprite.setTexture(startupScreenTexture);
+	startupScreenSprite.setPosition(0, 0);
 
-	// Bottom and top of screen
+	// Create bottom and top of screen
 	RectangleShape screenBottom;
 	screenBottom.setSize(Vector2f(X_RESOLUTION, Y_RESOLUTION * 0.1));
 	screenBottom.setFillColor(darkYellow);
@@ -77,25 +82,24 @@ int main()
 	// Track whether the game is running
 	bool paused = true;
 
-
+	// Create score counter at top of screen
 	int score = 0;
 	sf::Text scoreText;
-
 	sf::Font font;
 	font.loadFromFile("fonts/SEGOEPRB.TTF");
 	scoreText.setFont(font);
 	scoreText.setString(to_string(score));
-	scoreText.setOrigin(scoreText.getScale() * 0.5f);
 	scoreText.setCharacterSize(50);
+	scoreText.setOrigin(scoreText.getLocalBounds().getSize() * 0.5f);
 	scoreText.setFillColor(Color::White);
 	scoreText.setPosition(X_RESOLUTION * 0.5, Y_RESOLUTION * 0.02);
 
 	vector<Sprite> lives(NUM_LIVES);
 	for (int i = 0; i < NUM_LIVES; i++) {
 		lives[i].setTexture(textureStarship);
+		lives[i].setOrigin(lives[i].getLocalBounds().getSize() * 0.5f);
 		lives[i].setScale(Vector2f(2, 2));
-		lives[i].setOrigin(lives[i].getScale() * 0.5f);
-		lives[i].setPosition(X_RESOLUTION * 0.75 + (i * 50), (Y_RESOLUTION * 0.02) + 10);
+		lives[i].setPosition(X_RESOLUTION * 0.75 + (i * 50), (Y_RESOLUTION * 0.02) + 20);
 	}
 
 	// Random position generator
@@ -486,57 +490,42 @@ int main()
 		 ****************************************
 		 */
 
-		 // Clear everything from the last frame
-		window.clear();
+		if (paused) {
+			window.clear();
+			window.draw(startupScreenSprite);
+		} else {
+			window.clear();
 
-		// Draw our game scene here
-		window.draw(spriteBackground);
+			// Draw our game scene here
+			window.draw(spriteBackground);
 
-		// Draw the screen bottom and top
-		window.draw(screenBottom);
-		window.draw(screenTop);
+			// Draw the screen bottom and top
+			window.draw(screenBottom);
+			window.draw(screenTop);
 
-		// Draw the clouds
-		/*window.draw(spriteCloud1);
-		window.draw(spriteCloud2);
-		window.draw(spriteCloud3);*/
+			// Draw the starship
+			window.draw(spriteStarship);
 
-		// Draw the branches
-		/*for (int i = 0; i < NUM_MUSHROOMS; i++) {
-			window.draw(mushrooms[i]);
-		}*/
+			// Draw the spider
+			window.draw(spriteSpider);
 
-		// Draw the starship
-		window.draw(spriteStarship);
+			// Draw the score
+			window.draw(scoreText);
 
-		// Draw the spider
-		window.draw(spriteSpider);
+			// Iterate over map and draw mushrooms
+			map<pair<float, float>, mushroom>::iterator it;
+			for (it = mushrooms.begin(); it != mushrooms.end(); it++) {
+				window.draw(it->second.spriteMushroom);
+			}
 
-		// Draw the score
-		window.draw(scoreText);
-
-
-		// Iterate over map and draw mushrooms
-		map<pair<float, float>, mushroom>::iterator it;
-		for (it = mushrooms.begin(); it != mushrooms.end(); it++) {
-			window.draw(it->second.spriteMushroom);
-		}
-
-		// Draw lives in the corner
-		for (int i = 0; i < NUM_LIVES; i++) {
-			window.draw(lives[i]);
-		}
-
-		if (paused)
-		{
-			// Draw our message
-
+			// Draw lives in the corner
+			for (int i = 0; i < NUM_LIVES; i++) {
+				window.draw(lives[i]);
+			}
 		}
 
 		// Show everything we just drew
 		window.display();
-
-
 	}
 
 	return 0;
