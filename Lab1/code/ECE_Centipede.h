@@ -11,7 +11,6 @@ private:
     const float particleRadius = 10.f;
     const float speed = 200.f;
     const float followDistance = 20.f;
-    const int initialCount = 12;
 
     void initialize(Vector2f position) {
         bodyParts[0].setPosition(position);
@@ -55,7 +54,7 @@ private:
 
 public:
     ECE_Centipede() {
-        bodyParts.assign(initialCount, Sprite());
+        bodyParts.assign(NUM_BODIES, Sprite());
         initialize(Vector2f(300, 110));
     }
 
@@ -68,14 +67,15 @@ public:
         return bodyParts[0].getPosition();
     }
 
-    direction moveCentipede(direction prev) {
-        bool down = true, left = true, right = true;
+    direction moveCentipede(direction prevDir) {
+        bool down = true, left = true, right = true, up = true;
         Sprite head = bodyParts[0];
+
         FloatRect boundary = head.getGlobalBounds();
         Vector2f prevPos = head.getPosition();
 
-        for (int i = 0; i < mushrooms.size(); i++) {
-            FloatRect mushroomBox = mushrooms[i].spriteMushroom.getGlobalBounds();
+        for (int i = 0; i < entities.size(); i++) {
+            FloatRect mushroomBox = entities[i].spriteEntity.getGlobalBounds();
 
             // Explore right
             if (right) {
@@ -89,7 +89,7 @@ public:
             // Explore down
             if (down) {
                 head.move(0, followDistance);
-                if (boundary.intersects(mushroomBox)) {
+                if (boundary.intersects(mushroomBox) || head.getPosition().y >= Y_RESOLUTION * 0.9) {
                     down = false;
                 }
                 head.setPosition(prevPos);
@@ -103,11 +103,37 @@ public:
                 }
                 head.setPosition(prevPos);
             }
+
+            // Explore up
+            if (up) {
+                head.move(0, followDistance * -1);
+                if (boundary.intersects(mushroomBox) || head.getPosition().y <= Y_RESOLUTION * 0.09) {
+                    up = false;
+                }
+                head.setPosition(prevPos);
+            }
         }
 
-        switch (prev) {
+        vector<bool> choose = { false, false, false };
+        vector<direction> next = { direction::RIGHT, direction::DOWN, direction::LEFT, direction::UP };
+        if (right) { choose[0] = true; }
+        if (down) { choose[1] = true; }
+        if (left) { choose[2] = true; }
+        if (up) { choose[3] = true; }
+        choose[(int)prevDir] = false;
+
+        int choice;
+        srand(chrono::system_clock::now().time_since_epoch().count());
+        if (!choose[0] && !choose[1] && !choose[2]) { choice = 1; }
+        else { 
+            choice = rand() % choose.size();
+            if (!choose[choice]) { choice = (choice + 1) % 3; }
+            if (!choose[choice]) { choice = (choice + 1) % 3; }
+        }
+
+        switch (next[choice]) {
         case direction::RIGHT:
-            if (right) {
+            /*if (right) {
                 return updateBodyPositions(direction::RIGHT);
             }
             else if (down) {
@@ -116,9 +142,10 @@ public:
             else if (left) {
                 return updateBodyPositions(direction::LEFT);
             }
-            break;
+            break;*/
+            return updateBodyPositions(direction::RIGHT);
         case direction::DOWN:
-            if (left) {
+            /*if (left) {
                 return updateBodyPositions(direction::LEFT);
             }
             else if (right) {
@@ -127,9 +154,10 @@ public:
             else if (down) {
                 return updateBodyPositions(direction::DOWN);
             }
-            break;
+            break;*/
+            return updateBodyPositions(direction::DOWN);
         case direction::LEFT:
-            if (left) {
+            /*if (left) {
                 return updateBodyPositions(direction::LEFT);
             }
             else if (down) {
@@ -138,7 +166,20 @@ public:
             else if (right) {
                 return updateBodyPositions(direction::RIGHT);
             }
-            break;
+            break;*/
+            return updateBodyPositions(direction::LEFT);
+        case direction::UP:
+            /*if (left) {
+                return updateBodyPositions(direction::LEFT);
+            }
+            else if (down) {
+                return updateBodyPositions(direction::DOWN);
+            }
+            else if (right) {
+                return updateBodyPositions(direction::RIGHT);
+            }
+            break;*/
+            return updateBodyPositions(direction::UP);
         default:
             return updateBodyPositions(direction::DOWN);
         }

@@ -22,6 +22,7 @@ int main() {
 	spriteStarship.setOrigin(spriteStarship.getLocalBounds().getSize() * 0.5f);
 	spriteStarship.setScale(Vector2f(2, 2));
 	spriteStarship.setPosition(X_RESOLUTION * 0.5, Y_RESOLUTION * 0.95);
+	
 
 	// Make a spider sprite
 	Texture textureSpider;
@@ -51,7 +52,6 @@ int main() {
 	screenTop.setFillColor(DARK_YELLOW);
 	screenTop.setPosition(0, 0);
 
-	Clock clock;
 	float elapsedTime = 0.f;
 
 	// Track whether the game is running
@@ -88,19 +88,18 @@ int main() {
 	textureMushroom.loadFromFile("graphics/Mushroom0.png");
 	for (int i = 0; i < NUM_MUSHROOMS; i++) {
 		Vector2f position = Vector2f(mushroomPositionX(generator), mushroomPositionY(generator));
-		mushrooms[i] = mushroom();
-		mushrooms[i].spriteMushroom.setTexture(textureMushroom);
-		mushrooms[i].currentState = state::HEALTHY_MUSHROOM;
-		mushrooms[i].spriteMushroom.setOrigin(mushrooms[i].spriteMushroom.getLocalBounds().getSize() * 0.5f);
-		mushrooms[i].spriteMushroom.setPosition(position);
+		entities[i] = entity();
+		entities[i].spriteEntity.setTexture(textureMushroom);
+		entities[i].currentState = state::HEALTHY;
+		entities[i].spriteEntity.setOrigin(entities[i].spriteEntity.getLocalBounds().getSize() * 0.5f);
+		entities[i].spriteEntity.setPosition(position);
 	}
-
-	vector<ECE_Centipede> centipedes(1, ECE_Centipede());
+;
 	Texture textureCentipedeHead;
 	Texture textureCentipedeBody;
 	textureCentipedeHead.loadFromFile("graphics/CentipedeHead.png");
 	textureCentipedeBody.loadFromFile("graphics/CentipedeBody.png");
-	direction prevDir = direction::RIGHT;
+	direction prevDir = direction::LEFT;
 
 	// Control the player input
 	bool acceptInput = false;
@@ -264,28 +263,28 @@ int main() {
 			window.draw(screenTop);
 
 			// Draw the starship
-			window.draw(spriteStarship);
+			//window.draw(spriteStarship);
 
 			// Draw the spider
-			window.draw(spriteSpider);
+			//window.draw(spriteSpider);
 
 			// Draw the score
 			window.draw(scoreText);
 
 			// Iterate over map and draw mushrooms
-			for (int i = 0; i < mushrooms.size(); i++) {
-				window.draw(mushrooms[i].spriteMushroom);
+			for (int i = 0; i < entities.size(); i++) {
+				window.draw(entities[i].spriteEntity);
 			}
 
-			for (int i = 0; i < centipedes.size(); i++) {
-				vector<Sprite> bodyParts = centipedes[i].bodyParts;
-				bodyParts[0].setTexture(textureCentipedeHead);
-				window.draw(bodyParts[0]);
-				for (int j = 1; j < bodyParts.size(); j++) {
-					bodyParts[j].setTexture(textureCentipedeBody);
-					window.draw(bodyParts[j]);
-				}
-			}
+			//for (int i = 0; i < centipedes.size(); i++) {
+			//	vector<Sprite> bodyParts = centipedes[i].bodyParts;
+			//	bodyParts[0].setTexture(textureCentipedeHead);
+			//	window.draw(bodyParts[0]);
+			//	for (int j = 1; j < bodyParts.size(); j++) {
+			//		bodyParts[j].setTexture(textureCentipedeBody);
+			//		window.draw(bodyParts[j]);
+			//	}
+			//}
 
 			// Draw lives in the corner
 			for (int i = 0; i < NUM_LIVES; i++) {
