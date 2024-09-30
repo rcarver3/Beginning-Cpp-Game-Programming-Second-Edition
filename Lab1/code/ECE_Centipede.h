@@ -66,32 +66,85 @@ public:
         return bodyParts[0].getPosition();
     }
 
-    direction moveCentipede() {
-
+    direction moveCentipede(direction prev) {
         bool down = true, left = true, right = true;
-        direction dir;
-        float negative = followDistance * -1;
-        for (int i = 0; i < mushrooms.size(); i++) {
-            // Explore right
-            bodyParts[0].move(followDistance, 0);
-            if (bodyParts[0].getTextureRect().intersects((IntRect) mushrooms[i].spriteMushroom.getGlobalBounds()) ||
-                bodyParts[0].getTextureRect().intersects() {
+        Vector2f prevPos = bodyParts[0].getPosition();
+        if (bodyParts[0].getTextureRect().intersects(SCREEN_BOUNDARY)) {
+            if (bodyParts[0].getPosition().x > X_RESOLUTION * 0.5) {
                 right = false;
             }
-            bodyParts[0].move(negative, followDistance);
-            if (bodyParts[0].getTextureRect().intersects((IntRect)mushrooms[i].spriteMushroom.getGlobalBounds())) {
-                down = false;
-            }
-            bodyParts[0].move(negative, negative);
-            if (bodyParts[0].getTextureRect().intersects((IntRect)mushrooms[i].spriteMushroom.getGlobalBounds())) {
+            else {
                 left = false;
             }
-            bodyParts[0].move(followDistance, 0);
         }
-        if (1) {
-            bodyParts[0].move(followDistance * -1, 0);
-            return updateBodyPositions(direction::RIGHT);
+
+        for (int i = 0; i < mushrooms.size(); i++) {
+            IntRect mushroomBox = IntRect(mushrooms[i].spriteMushroom.getGlobalBounds());
+
+            // Explore right
+            if (right) {
+                bodyParts[0].move(followDistance, 0);
+                if (bodyParts[0].getTextureRect().intersects(mushroomBox)) {
+                    right = false;
+                }
+                bodyParts[0].setPosition(prevPos);
+            }
+
+            // Explore down
+            if (down) {
+                bodyParts[0].move(0, followDistance);
+                if (bodyParts[0].getTextureRect().intersects(mushroomBox)) {
+                    down = false;
+                }
+                bodyParts[0].setPosition(prevPos);
+            }
+
+            // Explore left
+            if (left) {
+                bodyParts[0].move(followDistance * -1, 0);
+                if (bodyParts[0].getTextureRect().intersects(mushroomBox)) {
+                    left = false;
+                }
+                bodyParts[0].setPosition(prevPos);
+            }
         }
-        return direction::NONE;
+
+        switch (prev) {
+        case direction::RIGHT:
+            if (right) {
+                return updateBodyPositions(direction::RIGHT);
+            }
+            else if (down) {
+                return updateBodyPositions(direction::DOWN);
+            }
+            else if (left) {
+                return updateBodyPositions(direction::LEFT);
+            }
+            break;
+        case direction::DOWN:
+            if (left) {
+                return updateBodyPositions(direction::LEFT);
+            }
+            else if (right) {
+                return updateBodyPositions(direction::RIGHT);
+            }
+            else if (down) {
+                return updateBodyPositions(direction::DOWN);
+            }
+            break;
+        case direction::LEFT:
+            if (left) {
+                return updateBodyPositions(direction::LEFT);
+            }
+            else if (down) {
+                return updateBodyPositions(direction::DOWN);
+            }
+            else if (right) {
+                return updateBodyPositions(direction::RIGHT);
+            }
+            break;
+        default:
+            return updateBodyPositions(direction::DOWN);
+        }
     }
 };
