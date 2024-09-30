@@ -9,6 +9,7 @@
 
 // Make code easier to type with "using namespace"
 using namespace sf;
+using namespace std;
 
 enum class state {
 	EMPTY,
@@ -21,33 +22,20 @@ struct mushroom {
 	state currentState;
 };
 
-// Function declaration
-// void updateBranches(int seed);
-
 const int NUM_MUSHROOMS = 30;
-
-// Where is the player/branch? 
-// Left or Right
-//enum class side { LEFT, RIGHT, NONE };
-//side branchPositions_remove[NUM_MUSHROOMS];
-
 
 int main()
 {
 	// Create and open a window for the game
 	RenderWindow window(VideoMode(1920, 1080), "Centipede", Style::Fullscreen);
 
-	// Create a sprite
+	// Create a background sprite
 	Sprite spriteBackground;
-
-	// Attach the texture to the sprite
 	spriteBackground.setColor(Color::Black);
-
-	// Set the spriteBackground to cover the screen
 	spriteBackground.setScale(1920, 1080);
 	spriteBackground.setPosition(0, 0);
 
-	// Make a tree sprite
+	// Make a starship sprite
 	Texture textureStarship;
 	textureStarship.loadFromFile("graphics/Starship.png");
 	Sprite spriteStarship;
@@ -56,28 +44,12 @@ int main()
 	spriteStarship.setOrigin(Vector2f(7, 11));
 	spriteStarship.setPosition(960, 1000);
 
-	// Prepare the bee
+	// Make a spider sprite
 	Texture textureSpider;
 	textureSpider.loadFromFile("graphics/spider.png");
 	Sprite spriteSpider;
 	spriteSpider.setTexture(textureSpider);
 	spriteSpider.setPosition(0, 800);
-
-
-	//// Position the clouds off screen
-	//spriteCloud1.setPosition(0, 0);
-	//spriteCloud2.setPosition(0, 150);
-	//spriteCloud3.setPosition(0, 300);
-
-	//// Are the clouds currently on screen?
-	//bool cloud1Active = false;
-	//bool cloud2Active = false;
-	//bool cloud3Active = false;
-
-	//// How fast is each cloud?
-	//float cloud1Speed = 0.0f;
-	//float cloud2Speed = 0.0f;
-	//float cloud3Speed = 0.0f;
 
 	// Variables to control time itself
 	Clock clock;
@@ -101,39 +73,25 @@ int main()
 	// Draw some text
 	int score = 0;
 
-	sf::Text messageText;
 	sf::Text scoreText;
 
 	// We need to choose a font
 	sf::Font font;
-	font.loadFromFile("fonts/JOKERMAN.ttf");
+	font.loadFromFile("fonts/SEGOEPRB.TTF");
 
 	// Set the font to our message
-	messageText.setFont(font);
 	scoreText.setFont(font);
 
 	// Assign the actual message
-	messageText.setString("Press Enter to start!");
 	scoreText.setString("Score = 0");
 
 	// Make it really big
-	messageText.setCharacterSize(75);
 	scoreText.setCharacterSize(100);
 
 	// Choose a color
-	messageText.setFillColor(Color::White);
 	scoreText.setFillColor(Color::White);
 
 	// Position the text
-	FloatRect textRect = messageText.getLocalBounds();
-
-	messageText.setOrigin(textRect.left +
-		textRect.width / 2.0f,
-		textRect.top +
-		textRect.height / 2.0f);
-
-	messageText.setPosition(1920 / 2.0f, 1080 / 2.0f);
-
 	scoreText.setPosition(20, 20);
 
 	// Random position generator
@@ -308,18 +266,6 @@ int main()
 
 				// Pause the game
 				paused = true;
-
-				// Change the message shown to the player
-				messageText.setString("Out of time!!");
-
-				//Reposition the text based on its new size
-				FloatRect textRect = messageText.getLocalBounds();
-				messageText.setOrigin(textRect.left +
-					textRect.width / 2.0f,
-					textRect.top +
-					textRect.height / 2.0f);
-
-				messageText.setPosition(1920 / 2.0f, 1080 / 2.0f);
 			}
 
 
@@ -579,7 +525,7 @@ int main()
 		if (paused)
 		{
 			// Draw our message
-			window.draw(messageText);
+
 		}
 
 		// Show everything we just drew
