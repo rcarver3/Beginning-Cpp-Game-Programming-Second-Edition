@@ -1,5 +1,6 @@
 #include "ProgramInfo.h"
 #include "ECE_Centipede.h"
+#include "materials.h"
 
 using namespace sf;
 using namespace std;
@@ -8,36 +9,31 @@ int main() {
 	// Create and open a window for the game
 	RenderWindow window(VideoMode(X_RESOLUTION, Y_RESOLUTION), "Centipede", Style::Default);
 
+	// Prepare font
+	font.loadFromFile("fonts/SEGOEPRB.TTF");
+
+	// Prepare textures
+	textureStarship.loadFromFile("graphics/Starship.png");
+	textureSpider.loadFromFile("graphics/spider.png");
+	textureStartup.loadFromFile("graphics/startup.png");
+	textureFullMushroom.loadFromFile("graphics/Mushroom0.png");
+	textureHalfMushroom.loadFromFile("graphics/Mushroom1.png");
+	textureCentipedeHead.loadFromFile("graphics/CentipedeHead.png");
+	textureCentipedeBody.loadFromFile("graphics/CentipedeBody.png");
+
 	// Create a background sprite
 	Sprite spriteBackground;
 	spriteBackground.setColor(Color::Black);
 	spriteBackground.setScale(X_RESOLUTION, Y_RESOLUTION);
 	spriteBackground.setPosition(0, 0);
 
-	// Make a starship sprite
-	Texture textureStarship;
-	textureStarship.loadFromFile("graphics/Starship.png");
-	Sprite spriteStarship;
-	spriteStarship.setTexture(textureStarship);
-	spriteStarship.setOrigin(spriteStarship.getLocalBounds().getSize() * 0.5f);
-	spriteStarship.setScale(Vector2f(2, 2));
-	spriteStarship.setPosition(X_RESOLUTION * 0.5, Y_RESOLUTION * 0.95);
-	
-
-	// Make a spider sprite
-	Texture textureSpider;
-	textureSpider.loadFromFile("graphics/spider.png");
-	Sprite spriteSpider;
-	spriteSpider.setTexture(textureSpider);
-	spriteSpider.setPosition(0, Y_RESOLUTION * 0.75);
-
 	// Make a startup screen sprite
-	Texture startupScreenTexture;
-	startupScreenTexture.loadFromFile("graphics/startup.png");
 	Sprite startupScreenSprite;
-	startupScreenSprite.setTexture(startupScreenTexture);
-	float x = (startupScreenTexture.getSize().x > X_RESOLUTION) ? ((float)X_RESOLUTION / startupScreenTexture.getSize().x) : (startupScreenTexture.getSize().x / (float)X_RESOLUTION);
-	float y = (startupScreenTexture.getSize().y > Y_RESOLUTION) ? ((float)Y_RESOLUTION / startupScreenTexture.getSize().y) : (startupScreenTexture.getSize().y / (float)Y_RESOLUTION);
+	startupScreenSprite.setTexture(textureStartup);
+
+	// Figure out how to scale startup texture
+	float x = (textureStartup.getSize().x > X_RESOLUTION) ? ((float)X_RESOLUTION / textureStartup.getSize().x) : (textureStartup.getSize().x / (float)X_RESOLUTION);
+	float y = (textureStartup.getSize().y > Y_RESOLUTION) ? ((float)Y_RESOLUTION / textureStartup.getSize().y) : (textureStartup.getSize().y / (float)Y_RESOLUTION);
 	startupScreenSprite.setScale(x, y);
 	startupScreenSprite.setPosition(0, 0);
 
@@ -52,24 +48,33 @@ int main() {
 	screenTop.setFillColor(DARK_YELLOW);
 	screenTop.setPosition(0, 0);
 
-	float elapsedTime = 0.f;
+	// Make a starship sprite
+	Sprite spriteStarship;
+	spriteStarship.setTexture(textureStarship);
+	spriteStarship.setScale(Vector2f(2, 2));
+	Vector2f position = Vector2f(X_RESOLUTION * 0.5, Y_RESOLUTION * 0.95);
+	entities.insert({ position, Entity(spriteStarship, position, STARSHIP)});
 
-	// Track whether the game is running
+	// Make a spider sprite
+	Sprite spriteSpider;
+	spriteSpider.setTexture(textureSpider);
+	entities.insert({ spriteSpider.getPosition(), Entity(spriteSpider, spriteSpider.getPosition(), SPIDER) });
+
+	float elapsedTime = 0.f;
 	bool paused = true;
 
 	// Create score counter at top of screen
 	int score = 0;
-	sf::Text scoreText;
-	sf::Font font;
-	font.loadFromFile("fonts/SEGOEPRB.TTF");
+	Text scoreText;
 	scoreText.setFont(font);
 	scoreText.setString(to_string(score));
 	scoreText.setCharacterSize(50);
 	scoreText.setOrigin(scoreText.getLocalBounds().getSize() * 0.5f);
 	scoreText.setFillColor(Color::White);
 	scoreText.setPosition(X_RESOLUTION * 0.5, Y_RESOLUTION * 0.02);
-
-	vector<Sprite> lives(NUM_LIVES);
+	
+	// Initialize lives separate from entities 
+	// because its not important to the field
 	for (int i = 0; i < NUM_LIVES; i++) {
 		lives[i].setTexture(textureStarship);
 		lives[i].setOrigin(lives[i].getLocalBounds().getSize() * 0.5f);
@@ -84,21 +89,12 @@ int main() {
 	uniform_int_distribution mushroomPositionY((int)(Y_RESOLUTION * 0.11), (int)(Y_RESOLUTION * 0.88));
 
 	// Initialize each mushroom into the map
-	Texture textureMushroom;
-	textureMushroom.loadFromFile("graphics/Mushroom0.png");
 	for (int i = 0; i < NUM_MUSHROOMS; i++) {
-		Vector2f position = Vector2f(mushroomPositionX(generator), mushroomPositionY(generator));
-		entities[i] = entity();
-		entities[i].spriteEntity.setTexture(textureMushroom);
-		entities[i].currentState = state::HEALTHY;
-		entities[i].spriteEntity.setOrigin(entities[i].spriteEntity.getLocalBounds().getSize() * 0.5f);
-		entities[i].spriteEntity.setPosition(position);
+		Vector2f position = Vector2f(((mushroomPositionX(generator) + 25) / 50) * 50, ((mushroomPositionY(generator) + 25) / 50) * 50);
+		entities.insert({ position, Entity(Sprite(textureFullMushroom), position, MUSHROOM)});
 	}
 ;
-	Texture textureCentipedeHead;
-	Texture textureCentipedeBody;
-	textureCentipedeHead.loadFromFile("graphics/CentipedeHead.png");
-	textureCentipedeBody.loadFromFile("graphics/CentipedeBody.png");
+
 	direction prevDir = direction::LEFT;
 
 	// Control the player input
