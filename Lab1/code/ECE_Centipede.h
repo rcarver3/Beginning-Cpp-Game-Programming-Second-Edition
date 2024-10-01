@@ -12,7 +12,7 @@ private:
     const float speed = 200.f;
     const float followDistance = 20.f;
 
-    void initialize(Vector2f position) {
+    void initialize(sf::Vector2f position) {
         bodyParts[0].setPosition(position);
         bodyParts[0].setTextureRect(IntRect(Vector2i(0, 0), Vector2i(23, 24)));
         for (int i = 1; i < bodyParts.size(); i++) {
@@ -24,19 +24,19 @@ private:
     direction updateBodyPositions(direction dir) {
         Vector2f velocity;
         switch (dir) {
-        case direction::UP:
+        case UP:
             velocity = Vector2f(0.f, followDistance * -1);
             break;
-        case direction::DOWN:
+        case DOWN:
             velocity = Vector2f(0.f, followDistance);
             break;
-        case direction::LEFT:
+        case LEFT:
             velocity = Vector2f(followDistance * -1, 0.f);
             break;
-        case direction::RIGHT:
+        case RIGHT:
             velocity = Vector2f(followDistance, 0.f);
             break;
-        case direction::NONE:
+        case NONE:
             velocity = Vector2f(0.f, 0.f);
             break;
         default:
@@ -74,48 +74,78 @@ public:
         FloatRect boundary = head.getGlobalBounds();
         Vector2f prevPos = head.getPosition();
 
-        for (int i = 0; i < entities.size(); i++) {
-            FloatRect mushroomBox = entities[i].spriteEntity.getGlobalBounds();
-
-            // Explore right
-            if (right) {
-                head.move(followDistance, 0);
-                if (boundary.intersects(mushroomBox) || head.getPosition().x >= X_RESOLUTION) {
-                    right = false;
-                }
+        // Explore right
+        if (right) {
+            //head.move(followDistance, 0);
+            //if (boundary || head.getPosition().x >= X_RESOLUTION) {
+            //    right = false;
+            //}
+            //head.setPosition(prevPos);
+            head.move(followDistance, 0);
+            try {
+                entities.at(head.getPosition());
+                right = false;
                 head.setPosition(prevPos);
             }
-
-            // Explore down
-            if (down) {
-                head.move(0, followDistance);
-                if (boundary.intersects(mushroomBox) || head.getPosition().y >= Y_RESOLUTION * 0.9) {
-                    down = false;
-                }
-                head.setPosition(prevPos);
-            }
-
-            // Explore left
-            if (left) {
-                head.move(followDistance * -1, 0);
-                if (boundary.intersects(mushroomBox) || head.getPosition().x <= 0) {
-                    left = false;
-                }
-                head.setPosition(prevPos);
-            }
-
-            // Explore up
-            if (up) {
-                head.move(0, followDistance * -1);
-                if (boundary.intersects(mushroomBox) || head.getPosition().y <= Y_RESOLUTION * 0.09) {
-                    up = false;
-                }
+            catch (out_of_range e) {
                 head.setPosition(prevPos);
             }
         }
 
+        // Explore down
+        if (down) {
+            //head.move(0, followDistance);
+            //if (boundary.intersects(boundingBox) || head.getPosition().y >= Y_RESOLUTION * 0.9) {
+            //    down = false;
+            //}
+            //head.setPosition(prevPos);
+            head.move(0, followDistance);
+            try {
+                entities.at(head.getPosition());
+                down = false;
+                head.setPosition(prevPos);
+            }
+            catch (out_of_range e) {
+                head.setPosition(prevPos);
+            }
+        }
+
+        // Explore left
+        if (left) {
+            head.move(-1 * followDistance, 0);
+            try {
+                entities.at(head.getPosition());
+                left = false;
+                head.setPosition(prevPos);
+            }
+            catch (out_of_range e) {
+                head.setPosition(prevPos);
+            }
+        }
+
+        if (up) {
+            head.move(0, -1 * followDistance);
+            try {
+                entities.at(head.getPosition());
+                up = false;
+                head.setPosition(prevPos);
+            }
+            catch (out_of_range e) {
+                head.setPosition(prevPos);
+            }
+        }
+        // Explore up
+        //if (up) {
+        //    head.move(0, followDistance * -1);
+        //    if (boundary.intersects(boundingBox) || head.getPosition().y <= Y_RESOLUTION * 0.09) {
+        //        up = false;
+        //    }
+        //    head.setPosition(prevPos);
+
+        
+
         vector<bool> choose = { false, false, false };
-        vector<direction> next = { direction::RIGHT, direction::DOWN, direction::LEFT, direction::UP };
+        vector<direction> next = { RIGHT, DOWN, LEFT, UP };
         if (right) { choose[0] = true; }
         if (down) { choose[1] = true; }
         if (left) { choose[2] = true; }
@@ -132,56 +162,56 @@ public:
         }
 
         switch (next[choice]) {
-        case direction::RIGHT:
+        case RIGHT:
             /*if (right) {
-                return updateBodyPositions(direction::RIGHT);
+                return updateBodyPositions(RIGHT);
             }
             else if (down) {
-                return updateBodyPositions(direction::DOWN);
+                return updateBodyPositions(DOWN);
             }
             else if (left) {
-                return updateBodyPositions(direction::LEFT);
+                return updateBodyPositions(LEFT);
             }
             break;*/
-            return updateBodyPositions(direction::RIGHT);
-        case direction::DOWN:
+            return updateBodyPositions(RIGHT);
+        case DOWN:
             /*if (left) {
-                return updateBodyPositions(direction::LEFT);
+                return updateBodyPositions(LEFT);
             }
             else if (right) {
-                return updateBodyPositions(direction::RIGHT);
+                return updateBodyPositions(RIGHT);
             }
             else if (down) {
-                return updateBodyPositions(direction::DOWN);
+                return updateBodyPositions(DOWN);
             }
             break;*/
-            return updateBodyPositions(direction::DOWN);
-        case direction::LEFT:
+            return updateBodyPositions(DOWN);
+        case LEFT:
             /*if (left) {
-                return updateBodyPositions(direction::LEFT);
+                return updateBodyPositions(LEFT);
             }
             else if (down) {
-                return updateBodyPositions(direction::DOWN);
+                return updateBodyPositions(DOWN);
             }
             else if (right) {
-                return updateBodyPositions(direction::RIGHT);
+                return updateBodyPositions(RIGHT);
             }
             break;*/
-            return updateBodyPositions(direction::LEFT);
-        case direction::UP:
+            return updateBodyPositions(LEFT);
+        case UP:
             /*if (left) {
-                return updateBodyPositions(direction::LEFT);
+                return updateBodyPositions(LEFT);
             }
             else if (down) {
-                return updateBodyPositions(direction::DOWN);
+                return updateBodyPositions(DOWN);
             }
             else if (right) {
-                return updateBodyPositions(direction::RIGHT);
+                return updateBodyPositions(RIGHT);
             }
             break;*/
-            return updateBodyPositions(direction::UP);
+            return updateBodyPositions(UP);
         default:
-            return updateBodyPositions(direction::DOWN);
+            return updateBodyPositions(DOWN);
         }
     }
 };

@@ -21,6 +21,8 @@ int main() {
 	textureCentipedeHead.loadFromFile("graphics/CentipedeHead.png");
 	textureCentipedeBody.loadFromFile("graphics/CentipedeBody.png");
 
+	whereabouts::hasher fn = entities.hash_function();
+
 	// Create a background sprite
 	Sprite spriteBackground;
 	spriteBackground.setColor(Color::Black);
@@ -48,21 +50,6 @@ int main() {
 	screenTop.setFillColor(DARK_YELLOW);
 	screenTop.setPosition(0, 0);
 
-	// Make a starship sprite
-	Sprite spriteStarship;
-	spriteStarship.setTexture(textureStarship);
-	spriteStarship.setScale(Vector2f(2, 2));
-	Vector2f position = Vector2f(X_RESOLUTION * 0.5, Y_RESOLUTION * 0.95);
-	entities.insert({ position, Entity(spriteStarship, position, STARSHIP)});
-
-	// Make a spider sprite
-	Sprite spriteSpider;
-	spriteSpider.setTexture(textureSpider);
-	entities.insert({ spriteSpider.getPosition(), Entity(spriteSpider, spriteSpider.getPosition(), SPIDER) });
-
-	float elapsedTime = 0.f;
-	bool paused = true;
-
 	// Create score counter at top of screen
 	int score = 0;
 	Text scoreText;
@@ -72,14 +59,42 @@ int main() {
 	scoreText.setOrigin(scoreText.getLocalBounds().getSize() * 0.5f);
 	scoreText.setFillColor(Color::White);
 	scoreText.setPosition(X_RESOLUTION * 0.5, Y_RESOLUTION * 0.02);
-	
+
 	// Initialize lives separate from entities 
 	// because its not important to the field
 	for (int i = 0; i < NUM_LIVES; i++) {
 		lives[i].setTexture(textureStarship);
 		lives[i].setOrigin(lives[i].getLocalBounds().getSize() * 0.5f);
 		lives[i].setScale(Vector2f(2, 2));
-		lives[i].setPosition(X_RESOLUTION * 0.75 + (i * 50), (Y_RESOLUTION * 0.02) + 20);
+		lives[i].setPosition((X_RESOLUTION * 0.75 + (i * 50)), (Y_RESOLUTION * 0.02) + 20);
+	}
+
+	// Make starship entities
+	for (int i = 0; i < NUM_SHIPS; i++) {
+		entity entityStarship;
+		Vector2f position = Vector2f(roundByFifty(X_RESOLUTION * 0.5), roundByFifty((Y_RESOLUTION * 0.95) + (i * 50)));
+
+		entityStarship.spriteEntity.setTexture(textureStarship);
+		entityStarship.spriteEntity.setOrigin(calculateOrigin(entityStarship));
+		entityStarship.spriteEntity.setScale(Vector2f(2, 2));
+		entityStarship.spriteEntity.setPosition(position);
+		entityStarship.entityType = STARSHIP;
+
+		entities.insert({ position, entityStarship });
+	}
+
+	// Make spider entities
+	for (int i = 0; i < NUM_SPIDERS; i++) {
+		entity entitySpider;
+		Vector2f position = Vector2f(roundByFifty((X_RESOLUTION * 0.5) + (i * 200)), roundByFifty((Y_RESOLUTION * 0.95) + (i * 50)));
+
+		entitySpider.spriteEntity.setTexture(textureSpider);
+		entitySpider.spriteEntity.setOrigin(calculateOrigin(entitySpider));
+		entitySpider.spriteEntity.setScale(Vector2f(2, 2));
+		entitySpider.spriteEntity.setPosition(position);
+		entitySpider.entityType = SPIDER;
+
+		entities.insert({ position, entitySpider });
 	}
 
 	// Random position generator
@@ -90,134 +105,99 @@ int main() {
 
 	// Initialize each mushroom into the map
 	for (int i = 0; i < NUM_MUSHROOMS; i++) {
-		Vector2f position = Vector2f(((mushroomPositionX(generator) + 25) / 50) * 50, ((mushroomPositionY(generator) + 25) / 50) * 50);
-		entities.insert({ position, Entity(Sprite(textureFullMushroom), position, MUSHROOM)});
+		entity entityMushroom;
+		int x = mushroomPositionX(generator);
+		int y = mushroomPositionY(generator);
+		Vector2f position = Vector2f(roundByFifty(x), roundByFifty(y));
+
+		entityMushroom.spriteEntity.setTexture(textureSpider);
+		entityMushroom.spriteEntity.setOrigin(calculateOrigin(entityMushroom));
+		entityMushroom.spriteEntity.setScale(Vector2f(2, 2));
+		entityMushroom.spriteEntity.setPosition(position);
+		entityMushroom.entityType = MUSHROOM;
+		entityMushroom.currentState = HEALTHY;
+
+		entities.insert({ position, entityMushroom });
+	} 
+
+	vector<ECE_Centipede> centipedes = { ECE_Centipede() };
+
+	entity entityHead;
+	entityHead.spriteEntity = centipedes[0].bodyParts[0];
+	entityHead.entityType = HEAD;
+	entityHead.currentState = HEALTHY;
+
+	entities.insert({ entityHead.spriteEntity.getPosition(), entityHead });
+
+	for (int i = 1; i < NUM_BODIES; i++) {
+		entity entityBody;
+		entityBody.spriteEntity = centipedes[0].bodyParts[i];
+		entityBody.entityType = BODY;
+		entityBody.currentState = HEALTHY;
+
+		entities.insert({ entityBody.spriteEntity.getPosition(), entityBody });
 	}
-;
+	// End of initialization
 
-	direction prevDir = direction::LEFT;
-
-	// Control the player input
-	bool acceptInput = false;
-
+	// Update Loop
 	while (window.isOpen())
 	{
-		// score ++;
 		Event event;
 		while (window.pollEvent(event))
-		{
-
-
-			if (event.type == Event::KeyReleased && !paused)
-			{
-				// Listen for key presses again
-				acceptInput = true;
-
-				// hide the axe
-				/*spriteAxe.setPosition(2000,
-					spriteAxe.getPosition().y);
-			}*/
-
-			}
-
-			/*
-			****************************************
-			Handle the players input
-			****************************************
-			*/
-
-			if (Keyboard::isKeyPressed(Keyboard::Escape))
-			{
+		{	
+			if (event.type == Event::Closed) {
 				window.close();
 			}
-
-			// Start the game
-			if (Keyboard::isKeyPressed(Keyboard::Return))
-			{
-				paused = false;
-
-				// Reset the time and the score
-				score = 0;
-
-				// Make all the branches disappear
-			/*	for (int i = 1; i < NUM_MUSHROOMS; i++)
-				{
-					branchPositions_remove[i] = side::NONE;
-				}*/
-
+			if (event.type == Event::KeyReleased && !paused) {
 				acceptInput = true;
-
-
+				movement = NONE;
+			}				
+			if (event.type == Event::KeyReleased && paused) {
+				acceptInput = true;
 			}
-
-			// Wrap the player controls to
-			// Make sure we are accepting input
 			if (acceptInput)
 			{
-				// More code here next...
-				// First handle pressing the right cursor key
-				if (Keyboard::isKeyPressed(Keyboard::Right))
+				if (!paused) 
 				{
-					// Make sure the player is on the right
-					//playerSide = side::RIGHT;
-
-					//score++;
-
-					//// Add to the amount of time remaining
-					//timeRemaining += (2 / score) + .15;
-
-					//spriteAxe.setPosition(AXE_POSITION_RIGHT,
-					//	spriteAxe.getPosition().y);
-
-					//
-
-					//spritePlayer.setPosition(1200, 720);
-
-					//// update the branches
-					//updateBranches(score);
-
-					//// set the log flying to the left
-					//spriteLog.setPosition(810, 720);
-					//logSpeedX = -5000;
-					//logActive = true;
-
-
-					acceptInput = false;
-
+					if (Keyboard::isKeyPressed(Keyboard::Escape)) 
+					{
+						paused = true;
+						movement = NONE;
+						acceptInput = false;
+					}
+					else if (Keyboard::isKeyPressed(Keyboard::Right))
+					{
+						movement = RIGHT;
+						acceptInput = false;
+					}
+					else if (Keyboard::isKeyPressed(Keyboard::Down))
+					{
+						movement = DOWN;
+						acceptInput = false;
+					}
+					else if (Keyboard::isKeyPressed(Keyboard::Left))
+					{
+						movement = LEFT;
+						acceptInput = false;
+					}
+					else if (Keyboard::isKeyPressed(Keyboard::Up))
+					{
+						movement = UP;
+						acceptInput = false;
+					}
+					else {
+						movement = NONE;
+					}
+				}	
+				else {
+					if (Keyboard::isKeyPressed(Keyboard::Escape) || Keyboard::isKeyPressed(Keyboard::Return)) {
+						acceptInput = false;
+						paused = false;
+					}
 				}
-
-				//// Handle the left cursor key
-				//if (Keyboard::isKeyPressed(Keyboard::Left))
-				//{
-				//	// Make sure the player is on the left
-				//	playerSide = side::LEFT;
-
-				//	score++;
-
-				//	// Add to the amount of time remaining
-				//	timeRemaining += (2 / score) + .15;
-
-				//	spriteAxe.setPosition(AXE_POSITION_LEFT,
-				//		spriteAxe.getPosition().y);
-
-
-				//	spritePlayer.setPosition(580, 720);
-
-				//	// update the branches
-				//	updateBranches(score);
-
-				//	// set the log flying
-				//	spriteLog.setPosition(810, 720);
-				//	logSpeedX = 5000;
-				//	logActive = true;
-
-
-				acceptInput = false;
-
 			}
-
-
 		}
+	}
 
 
 		/*
@@ -230,7 +210,7 @@ int main() {
 			window.draw(startupScreenSprite);
 		} else {
 			// Measure time
-			float deltaTime = clock.restart().asSeconds();
+			float deltaTime = sfClock.restart().asSeconds();
 
 			// If enough time has passed for 5 fps:
 			if (elapsedTime >= 0.2f) {
@@ -267,11 +247,16 @@ int main() {
 			// Draw the score
 			window.draw(scoreText);
 
-			// Iterate over map and draw mushrooms
-			for (int i = 0; i < entities.size(); i++) {
-				window.draw(entities[i].spriteEntity);
+			// Iterate over map and draw entities
+			for (pair<Vector2f, entity> i : entities) {
+				window.draw(i.second.spriteEntity);
+				if (i.first != i.second.spriteEntity.getPosition()) {
+					entity temp = i.second;
+					Vector2f newPos = i.second.spriteEntity.getPosition();
+					entities[newPos] = i.second;
+					entities.erase(i.first);
+				}
 			}
-
 			//for (int i = 0; i < centipedes.size(); i++) {
 			//	vector<Sprite> bodyParts = centipedes[i].bodyParts;
 			//	bodyParts[0].setTexture(textureCentipedeHead);
@@ -286,7 +271,7 @@ int main() {
 			for (int i = 0; i < NUM_LIVES; i++) {
 				window.draw(lives[i]);
 			}
-		}			
+					
 		// Show everything we just drew
 		window.display();
 	}

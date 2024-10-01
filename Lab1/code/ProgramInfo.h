@@ -8,6 +8,7 @@
 #include <cmath>
 #include <array>
 #include <unordered_map>
+#include <string>
 
 using namespace sf;
 using namespace std;
@@ -29,61 +30,18 @@ typedef enum direction {
 
 typedef enum entity_t {
 	NOTHING,
-	CENTIPEDE,
+	HEAD,
+	BODY,
 	MUSHROOM,
 	SPIDER,
 	STARSHIP
 } entity_t;
 
-class Entity {
+typedef struct entity {
 	Sprite spriteEntity = Sprite();
-	Vector2f position = Vector2f(0, 0);
-	Vector2f scale = Vector2f(1, 1);
 	entity_t entityType = NOTHING;
 	state currentState = HEALTHY;
-
-	// Default: initialize empty sprite with default params
-	Entity() {
-		spriteEntity.setScale(scale);
-		spriteEntity.setOrigin(spriteEntity.getLocalBounds().getSize() * 0.5f);
-	}
-
-	Entity(Sprite sprite, Vector2f position) : Entity() {
-		spriteEntity = sprite;
-		spriteEntity.setPosition(position);
-	}
-
-	Entity(Sprite sprite, Vector2f position, Vector2f scale) : Entity(sprite, position) {
-		spriteEntity.setScale(scale);
-	}
-
-	Entity(Sprite sprite, Vector2f position, Vector2f scale, entity_t type, state status) : Entity(sprite, position, scale) {
-		entityType = type;
-		currentState = status;
-	}
-
-	void setTexture(Texture texture) {
-		spriteEntity.setTexture(texture);
-	}
-
-	void setScale(Vector2f newScale) {
-		scale = newScale;
-		spriteEntity.setScale(scale);
-	}
-
-	void setPosition(Vector2f newPosition) {
-		newPosition = position;
-		spriteEntity.setPosition(newPosition);
-	}
-
-	void setType(entity_t type) {
-		entityType = type;
-	}
-
-	void setStatus(state status) {
-		currentState = status;
-	}
-};
+} entity;
 
 const int NUM_MUSHROOMS = 30;
 const int NUM_BODIES = 12;
@@ -99,7 +57,39 @@ const int Y_RESOLUTION = 1080;
 
 const Color DARK_YELLOW = Color(112, 119, 24);
 
-typedef unordered_map<Vector2f, Entity> whereabouts; 
+extern direction prevDir = LEFT;
 
+typedef unordered_map<Vector2f, entity, hash<Vector2f>> whereabouts;
 extern whereabouts entities = whereabouts(NUM_TOTAL_ENTITIES);
-extern whereabouts::iterator it;
+
+template <>
+struct hash<Vector2f>
+{
+	size_t operator()(const Vector2f& k) const
+	{
+		using std::size_t;
+		using std::hash;
+		using std::string;
+
+		// Compute individual hash values for first,
+		// second and third and combine them using XOR
+		// and bit shifting:
+
+		return ((hash<string>()(to_string(k.x))
+			^ (hash<string>()(to_string(k.y)) << 1)) >> 1);
+	}
+};
+
+extern Clock sfClock;
+extern direction movement = NONE;
+extern float elapsedTime = 0.f;
+extern bool paused = true;
+extern bool acceptInput = false;
+
+Vector2f calculateOrigin(entity Entity) {
+	return Entity.spriteEntity.getLocalBounds().getSize() * 0.5f;
+}
+
+int roundByFifty(int num) {
+	return ((num + 25) / 50) * 50;
+}
