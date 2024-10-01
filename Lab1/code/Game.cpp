@@ -7,7 +7,7 @@ using namespace std;
 int main() {
 	// Create and open a window for the game
 	RenderWindow window(VideoMode(X_RESOLUTION, Y_RESOLUTION), "Centipede", Style::Default);
-
+	
 	// Create a background sprite
 	Sprite spriteBackground;
 	spriteBackground.setColor(Color::Black);
