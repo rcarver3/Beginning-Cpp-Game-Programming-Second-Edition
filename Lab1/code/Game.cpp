@@ -1,4 +1,3 @@
-#include "ProgramInfo.h"
 #include "ECE_Centipede.h"
 #include "materials.h"
 
@@ -8,20 +7,6 @@ using namespace std;
 int main() {
 	// Create and open a window for the game
 	RenderWindow window(VideoMode(X_RESOLUTION, Y_RESOLUTION), "Centipede", Style::Default);
-
-	// Prepare font
-	font.loadFromFile("fonts/SEGOEPRB.TTF");
-
-	// Prepare textures
-	textureStarship.loadFromFile("graphics/Starship.png");
-	textureSpider.loadFromFile("graphics/spider.png");
-	textureStartup.loadFromFile("graphics/startup.png");
-	textureFullMushroom.loadFromFile("graphics/Mushroom0.png");
-	textureHalfMushroom.loadFromFile("graphics/Mushroom1.png");
-	textureCentipedeHead.loadFromFile("graphics/CentipedeHead.png");
-	textureCentipedeBody.loadFromFile("graphics/CentipedeBody.png");
-
-	whereabouts::hasher fn = entities.hash_function();
 
 	// Create a background sprite
 	Sprite spriteBackground;
@@ -121,7 +106,6 @@ int main() {
 	} 
 
 	vector<ECE_Centipede> centipedes = { ECE_Centipede() };
-
 	entity entityHead;
 	entityHead.spriteEntity = centipedes[0].bodyParts[0];
 	entityHead.entityType = HEAD;
@@ -143,6 +127,8 @@ int main() {
 	while (window.isOpen())
 	{
 		Event event;
+		Clock clock;
+
 		while (window.pollEvent(event))
 		{	
 			if (event.type == Event::Closed) {
@@ -197,9 +183,7 @@ int main() {
 				}
 			}
 		}
-	}
-
-
+		
 		/*
 		****************************************
 		Update the scene
@@ -210,7 +194,7 @@ int main() {
 			window.draw(startupScreenSprite);
 		} else {
 			// Measure time
-			float deltaTime = sfClock.restart().asSeconds();
+			float deltaTime = clock.restart().asSeconds();
 
 			// If enough time has passed for 5 fps:
 			if (elapsedTime >= 0.2f) {
@@ -222,56 +206,41 @@ int main() {
 			else {
 				elapsedTime += deltaTime;
 			}
-		
+		}
 
-			 /*
-			 ****************************************
-			 Draw the scene
-			 ****************************************
-			 */
-			window.clear();
+		/*
+		****************************************
+		Draw the scene
+		****************************************
+		*/
+		window.clear();
 
-			// Draw our game scene here
-			window.draw(spriteBackground);
+		// Draw our game scene here
+		window.draw(spriteBackground);
 
-			// Draw the screen bottom and top
-			window.draw(screenBottom);
-			window.draw(screenTop);
+		// Draw the screen bottom and top
+		window.draw(screenBottom);
+		window.draw(screenTop);
 
-			// Draw the starship
-			//window.draw(spriteStarship);
+		// Draw the score
+		window.draw(scoreText);
 
-			// Draw the spider
-			//window.draw(spriteSpider);
-
-			// Draw the score
-			window.draw(scoreText);
-
-			// Iterate over map and draw entities
-			for (pair<Vector2f, entity> i : entities) {
-				window.draw(i.second.spriteEntity);
-				if (i.first != i.second.spriteEntity.getPosition()) {
-					entity temp = i.second;
-					Vector2f newPos = i.second.spriteEntity.getPosition();
-					entities[newPos] = i.second;
-					entities.erase(i.first);
-				}
+		// Iterate over map and draw entities
+		for (pair<Vector2f, entity> i : entities) {
+			window.draw(i.second.spriteEntity);
+			if (i.first != i.second.spriteEntity.getPosition()) {
+				entity temp = i.second;
+				Vector2f newPos = i.second.spriteEntity.getPosition();
+				entities[newPos] = i.second;
+				entities.erase(i.first);
 			}
-			//for (int i = 0; i < centipedes.size(); i++) {
-			//	vector<Sprite> bodyParts = centipedes[i].bodyParts;
-			//	bodyParts[0].setTexture(textureCentipedeHead);
-			//	window.draw(bodyParts[0]);
-			//	for (int j = 1; j < bodyParts.size(); j++) {
-			//		bodyParts[j].setTexture(textureCentipedeBody);
-			//		window.draw(bodyParts[j]);
-			//	}
-			//}
+		}
 
-			// Draw lives in the corner
-			for (int i = 0; i < NUM_LIVES; i++) {
-				window.draw(lives[i]);
-			}
-					
+		// Draw lives in the corner
+		for (int i = 0; i < NUM_LIVES; i++) {
+			window.draw(lives[i]);
+		}
+
 		// Show everything we just drew
 		window.display();
 	}

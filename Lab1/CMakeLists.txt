@@ -14,7 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 file(GLOB SOURCES ${PROJECT_SOURCE_DIR}/code/*)
 
 # Add the executable
-add_executable(Lab1 ${SOURCES} "code/ProgramInfo.h")
+add_executable(Lab1 ${SOURCES})
 
 include_directories(${PROJECT_SOURCE_DIR}/../SFML/include)
 

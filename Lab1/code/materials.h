@@ -1,15 +1,12 @@
 #pragma once
-#include "ProgramInfo.h"
+#include <SFML/Graphics.hpp>
 
-using namespace sf;
-using namespace std;
+extern sf::Texture textureStarship;
+extern sf::Texture textureSpider;
+extern sf::Texture textureStartup;
+extern sf::Texture textureFullMushroom;
+extern sf::Texture textureHalfMushroom;
+extern sf::Texture textureCentipedeHead;
+extern sf::Texture textureCentipedeBody;
 
-extern Texture textureStarship;
-extern Texture textureSpider;
-extern Texture textureStartup;
-extern Texture textureFullMushroom;
-extern Texture textureHalfMushroom;
-extern Texture textureCentipedeHead;
-extern Texture textureCentipedeBody;
-
-extern Font font;
+extern sf::Font font;
