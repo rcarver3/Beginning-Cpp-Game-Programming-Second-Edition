@@ -1,3 +1,11 @@
+/*
+Author: Rhett Carver
+Class: ECE4122
+Last Date Modified: 10/2/24
+Description:
+The typedefs and structs used throughout the program.
+*/
+
 #pragma once
 #include "constants.h"
 #include <SFML/Graphics.hpp>
@@ -15,7 +23,8 @@ typedef enum direction {
 	LEFT = 1,
 	RIGHT = 2,
 	UP = 3, 
-	NONE = 4
+	NONE = 4,
+	GAMEOVER = 5
 } direction;
 
 typedef enum entity_t {

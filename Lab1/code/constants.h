@@ -1,3 +1,11 @@
+/*
+Author: Rhett Carver
+Class: ECE4122
+Last Date Modified: 10/2/24
+Description:
+Holds the constant values used throughout the program.
+*/
+
 #pragma once
 #include <SFML/Graphics.hpp>
 

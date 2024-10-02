@@ -1,3 +1,12 @@
+/*
+Author: Rhett Carver
+Class: ECE4122
+Last Date Modified: 10/2/24
+Description:
+Controls the motion and body positions of the centipede.
+*/
+
+
 #include "ECE_Centipede.h"
 #include <iostream>
 
@@ -24,10 +33,10 @@ direction ECE_Centipede::updateBodyPositions(direction dir, vector<entity> &body
         velocity = Vector2f(PIXEL_SCALE, 0);
         break;
     case NONE:
-        velocity = Vector2f(0, PIXEL_SCALE * 2);
+        velocity = Vector2f(0, PIXEL_SCALE);
         break;
     default:
-        velocity = Vector2f(0, PIXEL_SCALE * 2);
+        velocity = Vector2f(0, PIXEL_SCALE);
         break;
     }
     for (int i = bodyPartsTest.size() - 1; i > 0; i--) {
@@ -38,8 +47,41 @@ direction ECE_Centipede::updateBodyPositions(direction dir, vector<entity> &body
     // Finally, move the lead particle by velocity amount
     bodyPartsTest[0].spriteEntity.move(velocity);
     bodyPartsTest[0].moved = true;
+	if (bodyPartsTest[0].spriteEntity.getPosition().y >= Y_RESOLUTION * 0.9) {
+		dir = GAMEOVER;
+	}
     return dir;
 }
+
+// Unfinished divided centipede function
+//void ECE_Centipede::newCentipede(int num, std::vector<std::vector<entity>>& bodyPartsTest)
+//{
+//    int size = bodyPartsTest[num].size();
+//    bodyPartsTest[num].clear();
+//
+//	vector<entity> newCentipede1 = vector<entity>(size / 2, entity());
+//
+//    // Create first new centipede
+//	newCentipede1[0].entityType = HEAD;
+//
+//    for (int i = 1; i < newCentipede1.size(); i++) {
+//		newCentipede1[i].entityType = BODY;
+//    }
+//
+//    bodyPartsTest.push_back(newCentipede1);
+//
+//    // Create second new centipede
+//    vector<entity> newCentipede2 = vector<entity>(size / 2, entity());
+//
+//    // Create first new centipede
+//    newCentipede2[0].entityType = HEAD;
+//
+//    for (int i = 1; i < newCentipede2.size(); i++) {
+//        newCentipede2[i].entityType = BODY;
+//    }
+//
+//    bodyPartsTest.push_back(newCentipede2);
+//}
 
 direction ECE_Centipede::moveCentipede(direction prevDir, vector<entity>& bodyPartsTest) {
     bool choose[4] = {};
