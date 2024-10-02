@@ -11,11 +11,11 @@ typedef enum state {
 } state;
 
 typedef enum direction {
-	NONE = -1,
 	DOWN = 0,
 	LEFT = 1,
 	RIGHT = 2,
-	UP = 3
+	UP = 3, 
+	NONE = 4
 } direction;
 
 typedef enum entity_t {
@@ -32,6 +32,21 @@ typedef struct entity {
 	entity_t entityType = NOTHING;
 	state currentState = HEALTHY;
 	bool moved = false;
+
+	entity(sf::Sprite sprite, entity_t type) {
+		spriteEntity = sprite;
+		entityType = type;
+
+		sf::Vector2i currentScale = spriteEntity.getTextureRect().getSize();
+		spriteEntity.setOrigin(currentScale.x / 2.f, currentScale.y / 2.f);
+
+		if ((float)currentScale.x / currentScale.y < 1.5) {
+			spriteEntity.setScale(PIXEL_SCALE / currentScale.x, PIXEL_SCALE / currentScale.y);
+		}
+	}
+
+	entity() = default;
+
 } entity;
 
 template <>

@@ -12,22 +12,22 @@ direction ECE_Centipede::updateBodyPositions(direction dir, vector<entity> &body
     Vector2f velocity;
     switch (dir) {
     case UP:
-        velocity = Vector2f(0.f, FOLLOW_DISTANCE * -1);
+        velocity = Vector2f(0, PIXEL_SCALE * -1);
         break;
     case DOWN:
-        velocity = Vector2f(0.f, FOLLOW_DISTANCE);
+        velocity = Vector2f(0, PIXEL_SCALE);
         break;
     case LEFT:
-        velocity = Vector2f(FOLLOW_DISTANCE * -1, 0.f);
+        velocity = Vector2f(PIXEL_SCALE * -1, 0);
         break;
     case RIGHT:
-        velocity = Vector2f(FOLLOW_DISTANCE, 0.f);
+        velocity = Vector2f(PIXEL_SCALE, 0);
         break;
     case NONE:
-        velocity = Vector2f(0.f, 0.f);
+        velocity = Vector2f(0, PIXEL_SCALE * 2);
         break;
     default:
-        velocity = Vector2f(0.f, 0.f);
+        velocity = Vector2f(0, PIXEL_SCALE * 2);
         break;
     }
     for (int i = bodyPartsTest.size() - 1; i > 0; i--) {
@@ -41,22 +41,6 @@ direction ECE_Centipede::updateBodyPositions(direction dir, vector<entity> &body
     return dir;
 }
 
-//ECE_Centipede::ECE_Centipede(vector<entity>* body) {
-//	for (int i = 0; i < body->size(); i++) {
-//		// bodyParts[i] = body->at(i);
-//	}
-//}
-
-//ECE_Centipede::ECE_Centipede(int num, vector<entity>* body) {
-//    for (int i = 0; i < body->size(); i++) {
-//        // bodyParts[i] = body;
-//    }
-//}
-
-//Vector2f ECE_Centipede::getHeadPosition() {
-//    // return bodyParts[0].getPosition();
-//}
-
 direction ECE_Centipede::moveCentipede(direction prevDir, vector<entity>& bodyPartsTest) {
     bool choose[4] = {};
     Sprite head = bodyPartsTest[0].spriteEntity;
@@ -65,28 +49,29 @@ direction ECE_Centipede::moveCentipede(direction prevDir, vector<entity>& bodyPa
     Vector2f prevPos = head.getPosition();
 
     // Explore right
-    head.move(FOLLOW_DISTANCE, 0);
+    head.move(PIXEL_SCALE, 0);
     choose[RIGHT] = head.getPosition().x < X_RESOLUTION && head.getPosition().x > 0 && !entities.count(head.getPosition());
     head.setPosition(prevPos);
 
     // Explore down
-    head.move(0, FOLLOW_DISTANCE);
+    head.move(0, PIXEL_SCALE);
     choose[DOWN] = head.getPosition().y < Y_RESOLUTION && head.getPosition().y > 0 && !entities.count(head.getPosition());
     head.setPosition(prevPos);
 
     // Explore left
-    head.move(-1 * FOLLOW_DISTANCE, 0);
+    head.move(-1 * PIXEL_SCALE, 0);
     choose[LEFT] = head.getPosition().x < X_RESOLUTION && head.getPosition().x > 0 && !entities.count(head.getPosition());
     head.setPosition(prevPos);
 
     // Explore up
-    head.move(0, -1 * FOLLOW_DISTANCE);
+    head.move(0, -1 * PIXEL_SCALE);
 	choose[UP] = head.getPosition().y < Y_RESOLUTION && head.getPosition().y > 0 && !entities.count(head.getPosition());
     head.setPosition(prevPos);
 
-    direction choice = DOWN;
+    direction choice = NONE;
     srand(chrono::system_clock::now().time_since_epoch().count());
-    if (choose[UP] && !choose[DOWN] && !choose[LEFT] && !choose[RIGHT]) { choice = UP; }
+    if (!choose[UP] && !choose[DOWN] && !choose[LEFT] && !choose[RIGHT]) { choice = NONE; }
+    else if (choose[UP] && !choose[DOWN] && !choose[LEFT] && !choose[RIGHT]) { choice = UP; }
     else {
         if (prevDir == RIGHT) {
             if (choose[RIGHT]) { choice = RIGHT; }
@@ -105,7 +90,7 @@ direction ECE_Centipede::moveCentipede(direction prevDir, vector<entity>& bodyPa
                 else if (choose[RIGHT]) { choice = RIGHT; }
                 else { choice = DOWN; }
             }
-        } //down left right up
-        return updateBodyPositions(choice, bodyPartsTest);
+        }
     }
+    return updateBodyPositions(choice, bodyPartsTest);
 }

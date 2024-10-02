@@ -17,4 +17,4 @@ extern whereabouts entities;
 extern whereabouts::iterator it;
 
 sf::Vector2f calculateOrigin(entity Entity);
-int roundBy25(float num);
+int roundByPixel(float num);

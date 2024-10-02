@@ -18,8 +18,8 @@ Vector2f calculateOrigin(entity object) {
 	return object.spriteEntity.getLocalBounds().getSize() * 0.5f;
 }
 
-int roundBy25(float num) {
-	return (((static_cast<int>(num) + (25 / 2)) / 25) * 25);
+int roundByPixel(float num) {
+	return (((static_cast<int>(num) + (static_cast<int>(PIXEL_SCALE) / 2)) / static_cast<int>(PIXEL_SCALE)) * static_cast<int>(PIXEL_SCALE));
 }
 
 int main() {
@@ -88,36 +88,26 @@ int main() {
 	for (int i = 0; i < NUM_LIVES; i++) {
 		lives[i].setTexture(textureStarship);
 		lives[i].setOrigin(lives[i].getLocalBounds().getSize() * 0.5f);
-		lives[i].setScale(Vector2f(2, 2));
+		lives[i].setScale(PIXEL_SCALE / textureStarship.getSize().x, PIXEL_SCALE / textureStarship.getSize().y);
+		lives[i].scale(1.5, 1.5);
 		lives[i].setPosition((X_RESOLUTION * 0.75 + (i * 50)), (Y_RESOLUTION * 0.02) + 20);
 	}
 
 	// Make starship entities
 	for (int i = 0; i < NUM_SHIPS; i++) {
-		entity entityStarship;
-		Vector2f position = Vector2f(roundBy25(X_RESOLUTION * 0.5), roundBy25((Y_RESOLUTION * 0.95) + (i * 50)));
-
-		entityStarship.spriteEntity.setTexture(textureStarship);
-		entityStarship.spriteEntity.setOrigin(calculateOrigin(entityStarship));
-		entityStarship.spriteEntity.setScale(Vector2f(2, 2));
-		entityStarship.spriteEntity.setPosition(position);
-		entityStarship.entityType = STARSHIP;
-
-		entities.insert({ position, &entityStarship });
+		entity* entityStarship = new entity(Sprite(textureStarship), STARSHIP);
+		Vector2f position = Vector2f(roundByPixel(X_RESOLUTION * 0.5), roundByPixel((Y_RESOLUTION * 0.95) + (i * 50)));
+		entityStarship->spriteEntity.setPosition(position);
+		entityStarship->spriteEntity.scale(1.5, 1.5);
+		entities.insert({ position, entityStarship });
 	}
 
 	// Make spider entities
 	for (int i = 0; i < NUM_SPIDERS; i++) {
-		entity entitySpider;
-		Vector2f position = Vector2f(roundBy25((X_RESOLUTION * 0.5) + (i * 200)), roundBy25((Y_RESOLUTION * 0.50) + (i * 50)));
-
-		entitySpider.spriteEntity.setTexture(textureSpider);
-		entitySpider.spriteEntity.setOrigin(calculateOrigin(entitySpider));
-		entitySpider.spriteEntity.setScale(Vector2f(2, 2));
-		entitySpider.spriteEntity.setPosition(position);
-		entitySpider.entityType = SPIDER;
-
-		entities.insert({ position, &entitySpider });
+		entity* entitySpider = new entity(Sprite(textureSpider), SPIDER);
+		Vector2f position = Vector2f(roundByPixel((X_RESOLUTION * 0.5) + (i * 200)), roundByPixel((Y_RESOLUTION * 0.50) + (i * 50)));
+		entitySpider->spriteEntity.setPosition(position);
+		entities.insert({ position, entitySpider });
 	}
 
 	// Random position generator
@@ -127,39 +117,27 @@ int main() {
 
 	// Initialize each mushroom into the map
 	for (int i = 0; i < NUM_MUSHROOMS; i++) {
-		entity* entityMushroom = new entity();
+		entity* entityMushroom = new entity(Sprite(textureFullMushroom), MUSHROOM);
 		generator.seed(chrono::system_clock::now().time_since_epoch().count());
-		Vector2f position = Vector2f(roundBy25(mushroomPositionX(generator)), roundBy25(mushroomPositionY(generator)));
-		// cout << "x: " + to_string(position.x) + " y: " + to_string(position.y) + '\n';
-
-		entityMushroom->spriteEntity.setTexture(textureFullMushroom);
-		entityMushroom->spriteEntity.setOrigin(calculateOrigin(*entityMushroom));
-		entityMushroom->spriteEntity.setScale(Vector2f(2, 2));
+		Vector2f position = Vector2f(roundByPixel(mushroomPositionX(generator)), roundByPixel(mushroomPositionY(generator)));
 		entityMushroom->spriteEntity.setPosition(position);
-		entityMushroom->entityType = MUSHROOM;
-		entityMushroom->currentState = HEALTHY;
 
 		entities.insert({ position, entityMushroom });
 	}
 
-	vector<vector<entity>> centipedes = { vector<entity>(NUM_BODIES, entity()) };
+	vector<vector<entity>> centipedes = { vector<entity>(NUM_BODIES, entity(Sprite(textureCentipedeBody), BODY)) };
 
 	centipedes[0][0].spriteEntity.setTexture(textureCentipedeHead);
-	centipedes[0][0].spriteEntity.setOrigin(calculateOrigin(centipedes[0][0]));
-	centipedes[0][0].spriteEntity.setScale(Vector2f(2, 2));
-	centipedes[0][0].spriteEntity.setPosition(roundBy25(X_RESOLUTION * 0.55), roundBy25(Y_RESOLUTION * 0.11));
+	centipedes[0][0].spriteEntity.setPosition(roundByPixel(X_RESOLUTION * 0.55), roundByPixel(Y_RESOLUTION * 0.11));
 	centipedes[0][0].entityType = HEAD;
-	centipedes[0][0].currentState = HEALTHY;
 
 	entities.insert({ centipedes[0][0].spriteEntity.getPosition(), &centipedes[0][0] });
 
 	for (int i = 1; i < NUM_BODIES; i++) {
-		centipedes[0][i].spriteEntity.setTexture(textureCentipedeBody);
-		centipedes[0][i].spriteEntity.setOrigin(calculateOrigin(centipedes[0][i]));
-		centipedes[0][i].spriteEntity.setScale(Vector2f(2, 2));
-		centipedes[0][i].spriteEntity.setPosition(roundBy25(X_RESOLUTION * 0.55) - (i * FOLLOW_DISTANCE), roundBy25(Y_RESOLUTION * 0.11));
-		centipedes[0][i].entityType = BODY;
-		centipedes[0][i].currentState = HEALTHY;
+		//centipedes[0][i].spriteEntity.setTexture(textureCentipedeBody);
+		//centipedes[0][i].spriteEntity.setOrigin(calculateOrigin(centipedes[0][i]));
+		//centipedes[0][i].spriteEntity.setScale(Vector2f(ENTITY_SCALE, ENTITY_SCALE));
+		centipedes[0][i].spriteEntity.setPosition(roundByPixel(X_RESOLUTION * 0.55) - (i * PIXEL_SCALE), roundByPixel(Y_RESOLUTION * 0.11));
 
 		entities.insert({ centipedes[0][i].spriteEntity.getPosition(), &centipedes[0][i] });
 	} // End of initialization
