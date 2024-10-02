@@ -8,24 +8,23 @@ using namespace sf;
 using namespace std;
 
 std::vector<Sprite> lives(NUM_LIVES);
-direction prevDir = LEFT;
 direction movement = NONE;
 float elapsedTime = 0.f;
 bool paused = true;
 bool acceptInput = false;
 whereabouts entities = whereabouts(NUM_TOTAL_ENTITIES);
 
-Vector2f calculateOrigin(entity Entity) {
-	return Entity.spriteEntity.getLocalBounds().getSize() * 0.5f;
+Vector2f calculateOrigin(entity object) {
+	return object.spriteEntity.getLocalBounds().getSize() * 0.5f;
 }
 
-int roundByFifty(int num) {
-	return ((num + 25) / 50) * 50;
+int roundBy25(float num) {
+	return (((static_cast<int>(num) + (25 / 2)) / 25) * 25);
 }
 
 int main() {
 	// Create and open a window for the game
-	RenderWindow window(VideoMode(X_RESOLUTION, Y_RESOLUTION), "Centipede", Style::Default);
+	RenderWindow window(VideoMode((int)X_RESOLUTION, (int)Y_RESOLUTION), "Centipede!!", Style::Default);
 
 	// Create Texture and Font objects
 	Texture textureStarship;
@@ -36,8 +35,8 @@ int main() {
 	Texture textureCentipedeHead;
 	Texture textureCentipedeBody;
 	Font font;
-	
-	// Prepare textures
+
+	// Prepare textures and fonts
 	textureStarship.loadFromFile("graphics/Starship.png");
 	textureSpider.loadFromFile("graphics/spider.png");
 	textureStartup.loadFromFile("graphics/startup.png");
@@ -45,8 +44,6 @@ int main() {
 	textureHalfMushroom.loadFromFile("graphics/Mushroom1.png");
 	textureCentipedeHead.loadFromFile("graphics/CentipedeHead.png");
 	textureCentipedeBody.loadFromFile("graphics/CentipedeBody.png");
-
-	// Prepare font
 	font.loadFromFile("fonts/SEGOEPRB.TTF");
 
 	// Create a background sprite
@@ -60,8 +57,8 @@ int main() {
 	startupScreenSprite.setTexture(textureStartup);
 
 	// Figure out how to scale startup texture
-	float x = (textureStartup.getSize().x > X_RESOLUTION) ? ((float)X_RESOLUTION / textureStartup.getSize().x) : (textureStartup.getSize().x / (float)X_RESOLUTION);
-	float y = (textureStartup.getSize().y > Y_RESOLUTION) ? ((float)Y_RESOLUTION / textureStartup.getSize().y) : (textureStartup.getSize().y / (float)Y_RESOLUTION);
+	float x = (textureStartup.getSize().x > X_RESOLUTION) ? (static_cast<float>(X_RESOLUTION) / textureStartup.getSize().x) : (static_cast<float>(textureStartup.getSize().x) / X_RESOLUTION);
+	float y = (textureStartup.getSize().y > Y_RESOLUTION) ? (static_cast<float>(Y_RESOLUTION) / textureStartup.getSize().y) : (static_cast<float>(textureStartup.getSize().y) / Y_RESOLUTION);
 	startupScreenSprite.setScale(x, y);
 	startupScreenSprite.setPosition(0, 0);
 
@@ -98,7 +95,7 @@ int main() {
 	// Make starship entities
 	for (int i = 0; i < NUM_SHIPS; i++) {
 		entity entityStarship;
-		Vector2f position = Vector2f(roundByFifty(X_RESOLUTION * 0.5), roundByFifty((Y_RESOLUTION * 0.95) + (i * 50)));
+		Vector2f position = Vector2f(roundBy25(X_RESOLUTION * 0.5), roundBy25((Y_RESOLUTION * 0.95) + (i * 50)));
 
 		entityStarship.spriteEntity.setTexture(textureStarship);
 		entityStarship.spriteEntity.setOrigin(calculateOrigin(entityStarship));
@@ -112,7 +109,7 @@ int main() {
 	// Make spider entities
 	for (int i = 0; i < NUM_SPIDERS; i++) {
 		entity entitySpider;
-		Vector2f position = Vector2f(roundByFifty((X_RESOLUTION * 0.5) + (i * 200)), roundByFifty((Y_RESOLUTION * 0.95) + (i * 50)));
+		Vector2f position = Vector2f(roundBy25((X_RESOLUTION * 0.5) + (i * 200)), roundBy25((Y_RESOLUTION * 0.50) + (i * 50)));
 
 		entitySpider.spriteEntity.setTexture(textureSpider);
 		entitySpider.spriteEntity.setOrigin(calculateOrigin(entitySpider));
@@ -125,71 +122,81 @@ int main() {
 
 	// Random position generator
 	default_random_engine generator;
-	generator.seed(chrono::system_clock::now().time_since_epoch().count());
-	uniform_int_distribution mushroomPositionX(0, X_RESOLUTION);
-	uniform_int_distribution mushroomPositionY((int)(Y_RESOLUTION * 0.11), (int)(Y_RESOLUTION * 0.88));
+    uniform_int_distribution<int> mushroomPositionX(0, X_RESOLUTION);
+	uniform_int_distribution<int> mushroomPositionY(Y_RESOLUTION * 0.11, Y_RESOLUTION * 0.88);
 
 	// Initialize each mushroom into the map
 	for (int i = 0; i < NUM_MUSHROOMS; i++) {
-		entity entityMushroom;
-		int x = mushroomPositionX(generator);
-		int y = mushroomPositionY(generator);
-		Vector2f position = Vector2f(roundByFifty(x), roundByFifty(y));
+		entity* entityMushroom = new entity();
+		generator.seed(chrono::system_clock::now().time_since_epoch().count());
+		Vector2f position = Vector2f(roundBy25(mushroomPositionX(generator)), roundBy25(mushroomPositionY(generator)));
+		// cout << "x: " + to_string(position.x) + " y: " + to_string(position.y) + '\n';
 
-		entityMushroom.spriteEntity.setTexture(textureFullMushroom);
-		entityMushroom.spriteEntity.setOrigin(calculateOrigin(entityMushroom));
-		entityMushroom.spriteEntity.setScale(Vector2f(2, 2));
-		entityMushroom.spriteEntity.setPosition(position);
-		entityMushroom.entityType = MUSHROOM;
-		entityMushroom.currentState = HEALTHY;
+		entityMushroom->spriteEntity.setTexture(textureFullMushroom);
+		entityMushroom->spriteEntity.setOrigin(calculateOrigin(*entityMushroom));
+		entityMushroom->spriteEntity.setScale(Vector2f(2, 2));
+		entityMushroom->spriteEntity.setPosition(position);
+		entityMushroom->entityType = MUSHROOM;
+		entityMushroom->currentState = HEALTHY;
 
-		entities.insert({ position, &entityMushroom });
-	} 
+		entities.insert({ position, entityMushroom });
+	}
 
-	vector<ECE_Centipede> centipedes = { ECE_Centipede() };
-	entity entityHead;
-	entityHead.spriteEntity = centipedes[0].bodyParts[0];
-    entityHead.entityType = HEAD;
-    entityHead.currentState = HEALTHY;
+	vector<vector<entity>> centipedes = { vector<entity>(NUM_BODIES, entity()) };
 
-	entities.insert({ entityHead.spriteEntity.getPosition(), &entityHead });
+	centipedes[0][0].spriteEntity.setTexture(textureCentipedeHead);
+	centipedes[0][0].spriteEntity.setOrigin(calculateOrigin(centipedes[0][0]));
+	centipedes[0][0].spriteEntity.setScale(Vector2f(2, 2));
+	centipedes[0][0].spriteEntity.setPosition(roundBy25(X_RESOLUTION * 0.55), roundBy25(Y_RESOLUTION * 0.11));
+	centipedes[0][0].entityType = HEAD;
+	centipedes[0][0].currentState = HEALTHY;
+
+	entities.insert({ centipedes[0][0].spriteEntity.getPosition(), &centipedes[0][0] });
 
 	for (int i = 1; i < NUM_BODIES; i++) {
-		entity entityBody;
-		entityBody.spriteEntity = centipedes[0].bodyParts[i];
-		entityBody.entityType = BODY;
-		entityBody.currentState = HEALTHY;
+		centipedes[0][i].spriteEntity.setTexture(textureCentipedeBody);
+		centipedes[0][i].spriteEntity.setOrigin(calculateOrigin(centipedes[0][i]));
+		centipedes[0][i].spriteEntity.setScale(Vector2f(2, 2));
+		centipedes[0][i].spriteEntity.setPosition(roundBy25(X_RESOLUTION * 0.55) - (i * FOLLOW_DISTANCE), roundBy25(Y_RESOLUTION * 0.11));
+		centipedes[0][i].entityType = BODY;
+		centipedes[0][i].currentState = HEALTHY;
 
-		entities.insert({ entityBody.spriteEntity.getPosition(), &entityBody });
-	}
-	// End of initialization
+		entities.insert({ centipedes[0][i].spriteEntity.getPosition(), &centipedes[0][i] });
+	} // End of initialization
 
-	Event event;
-	Clock clock;
+	Event event = Event();
+	Clock clock = Clock();
+	direction prevDir = RIGHT;
+	ECE_Centipede centipedeController = ECE_Centipede();
+
+	bool acceptInput = true;
+	bool unopened = true;
+	bool paused = true;
 
 	// Update Loop
 	while (window.isOpen())
 	{
-
 		while (window.pollEvent(event))
-		{	
+		{
 			if (event.type == Event::Closed) {
 				window.close();
 			}
-			if (event.type == Event::KeyReleased && !paused) {
-				acceptInput = true;
-				movement = NONE;
-			}				
-			if (event.type == Event::KeyReleased && paused) {
+			if (!unopened && event.type == Event::KeyReleased) {
+				paused = !paused;
 				acceptInput = true;
 			}
 			if (acceptInput)
 			{
-				if (!paused) 
+				if (unopened) {
+					if (Keyboard::isKeyPressed(Keyboard::Return)) {
+						unopened = false;
+						acceptInput = false;
+					}
+				}
+				else if (!paused)
 				{
-					if (Keyboard::isKeyPressed(Keyboard::Escape)) 
+					if (Keyboard::isKeyPressed(Keyboard::Escape))
 					{
-						paused = true;
 						movement = NONE;
 						acceptInput = false;
 					}
@@ -213,19 +220,16 @@ int main() {
 						movement = UP;
 						acceptInput = false;
 					}
+					else if (Keyboard::isKeyPressed(Keyboard::Escape) || Keyboard::isKeyPressed(Keyboard::Return)) {
+						acceptInput = false;
+					}
 					else {
 						movement = NONE;
-					}
-				}	
-				else {
-					if (Keyboard::isKeyPressed(Keyboard::Escape) || Keyboard::isKeyPressed(Keyboard::Return)) {
-						acceptInput = false;
-						paused = false;
 					}
 				}
 			}
 		}
-		
+
 		/*
 		****************************************
 		Update the scene
@@ -237,21 +241,13 @@ int main() {
 			window.display();
 		}
 		else {
-			// Measure time
-			//float deltaTime = clock.restart().asSeconds();
-
 			// If enough time has passed for 5 fps:
-			cout << to_string(clock.getElapsedTime().asSeconds());
 			if (clock.getElapsedTime().asSeconds() >= 0.2f) {
 				for (int i = 0; i < centipedes.size(); i++) {
-					prevDir = centipedes[i].moveCentipede(prevDir);
+					prevDir = centipedeController.moveCentipede(prevDir, centipedes[i]);
 				}
 				clock.restart();
 			}
-			//else {
-			//	cout << to_string(deltaTime) + '\n';
-			//	elapsedTime += deltaTime;
-			//}
 
 			/*
 			****************************************
@@ -276,14 +272,16 @@ int main() {
 			for (it = entities.begin(); it != entities.end(); it++) {
 				Sprite subject = it->second->spriteEntity;
 				window.draw(subject);
-				if (it->first != it->second->spriteEntity.getPosition()) {
+				if (it->second->moved) {
+					it->second->moved = false;
 					updates.push_back({ it->second->spriteEntity.getPosition(), it->second });
 				}
 			}
 
 			for (pair<Vector2f, entity*> update : updates) {
-				entities[update.first] = update.second;
 				entities.erase(update.second->spriteEntity.getPosition());
+				entities[update.first] = update.second;
+
 			}
 
 			// Draw lives in the corner
@@ -297,36 +295,3 @@ int main() {
 	}
 	return 0;
 }
-
-//// Function definition
-//void updateBranches(int seed)
-//{
-//	// Move all the branches down one place
-//	for (int j = NUM_MUSHROOMS - 1; j > 0; j--) {
-//		branchPositions_remove[j] = branchPositions_remove[j - 1];
-//	}
-//
-//	// Spawn a new branch at position 0
-//	// LEFT, RIGHT or NONE
-//	srand((int)time(0) + seed);
-//	int r = (rand() % 5);
-//
-//	switch (r) {
-//	case 0:
-//		branchPositions_remove[0] = side::LEFT;
-//		break;
-//
-//	case 1:
-//		branchPositions_remove[0] = side::RIGHT;
-//		break;
-//
-//	default:
-//		branchPositions_remove[0] = side::NONE;
-//		break;
-//	}
-//
-//
-//}
-
-
-

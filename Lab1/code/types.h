@@ -1,4 +1,5 @@
 #pragma once
+#include "constants.h"
 #include <SFML/Graphics.hpp>
 #include <unordered_map>
 
@@ -30,6 +31,7 @@ typedef struct entity {
 	sf::Sprite spriteEntity = sf::Sprite();
 	entity_t entityType = NOTHING;
 	state currentState = HEALTHY;
+	bool moved = false;
 } entity;
 
 template <>
@@ -37,7 +39,7 @@ struct std::hash<sf::Vector2f>
 {
 	std::size_t operator()(const sf::Vector2f& k) const
 	{
-		return ((std::hash<float>()(k.x) ^ (std::hash<float>()(k.y) << 1)) >> 1);
+		return ((std::hash<float>()(k.x) + std::hash<float>()(k.y)) % (X_RESOLUTION + Y_RESOLUTION));
 	}
 };
 

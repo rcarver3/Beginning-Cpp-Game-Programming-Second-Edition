@@ -13,10 +13,8 @@ extern std::vector<sf::Sprite> lives;
 extern direction prevDir;
 extern direction movement;
 extern float elapsedTime;
-extern bool paused;
-extern bool acceptInput;
 extern whereabouts entities;
 extern whereabouts::iterator it;
 
 sf::Vector2f calculateOrigin(entity Entity);
-int roundByFifty(int num);
+int roundBy25(float num);
