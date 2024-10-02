@@ -1,9 +1,13 @@
 #pragma once
-#include "ProgramInfo.h"
+#include "types.h"
+#include "constants.h"
+#include "Game.h"
+#include <SFML/Graphics.hpp>
+#include <vector>
 
-extern class ECE_Centipede {
+class ECE_Centipede {
 public:
-    vector<sf::Sprite> bodyParts;
+    std::vector<sf::Sprite> bodyParts;
 
 private:
     const float particleRadius = 10.f;
@@ -15,7 +19,7 @@ private:
 
 public:
     ECE_Centipede();
-    ECE_Centipede(int num, Vector2f position);
-    Vector2f getHeadPosition();
+    ECE_Centipede(int num, sf::Vector2f position);
+    sf::Vector2f getHeadPosition();
     direction moveCentipede(direction prevDir);
 };

@@ -3,6 +3,7 @@
 ################################################################################
 
 /.vs
-/build
+/out
 /CMakeSettings.json
-/out/build/x64-Debug
+/Chapters
+/SFML

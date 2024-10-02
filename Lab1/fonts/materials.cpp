@@ -12,7 +12,9 @@ Texture textureCentipedeBody;
 
 Font font;
 
-static void loadMaterials() {
+static bool materialsLoaded = false;
+
+void loadMaterials() {
 	// Prepare textures
 	textureStarship.loadFromFile("graphics/Starship.png");
 	textureSpider.loadFromFile("graphics/spider.png");
@@ -24,4 +26,12 @@ static void loadMaterials() {
 
 	// Prepare font
 	font.loadFromFile("font/SEGOEPRB.TTF");
+
+	materialsLoaded = true;
+}
+
+void ensureMaterialsLoaded() {
+	if (!materialsLoaded) {
+		loadMaterials();
+	}
 }

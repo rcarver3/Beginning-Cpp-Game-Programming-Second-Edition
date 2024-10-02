@@ -58,18 +58,18 @@ Vector2f ECE_Centipede::getHeadPosition() {
 }
 
 direction ECE_Centipede::moveCentipede(direction prevDir) {
-    bool down = true, left = true, right = true, up = true;
+    bool choose[4] = {true, true, true, true};
     Sprite head = bodyParts[0];
 
     FloatRect boundary = head.getGlobalBounds();
     Vector2f prevPos = head.getPosition();
 
     // Explore right
-    if (right) {
+    if (choose[RIGHT]) {
         head.move(followDistance, 0);
         try {
             entities.at(head.getPosition());
-            right = false;
+            choose[RIGHT] = false;
             head.setPosition(prevPos);
         }
         catch (out_of_range e) {
@@ -78,11 +78,11 @@ direction ECE_Centipede::moveCentipede(direction prevDir) {
     }
 
     // Explore down
-    if (down) {
+    if (choose[DOWN]) {
         head.move(0, followDistance);
         try {
             entities.at(head.getPosition());
-            down = false;
+            choose[DOWN] = false;
             head.setPosition(prevPos);
         }
         catch (out_of_range e) {
@@ -91,11 +91,11 @@ direction ECE_Centipede::moveCentipede(direction prevDir) {
     }
 
     // Explore left
-    if (left) {
+    if (choose[LEFT]) {
         head.move(-1 * followDistance, 0);
         try {
             entities.at(head.getPosition());
-            left = false;
+			choose[LEFT] = false;
             head.setPosition(prevPos);
         }
         catch (out_of_range e) {
@@ -104,11 +104,11 @@ direction ECE_Centipede::moveCentipede(direction prevDir) {
     }
 
     // Explore up
-    if (up) {
+    if (choose[UP]) {
         head.move(0, -1 * followDistance);
         try {
             entities.at(head.getPosition());
-            up = false;
+			choose[UP] = false;
             head.setPosition(prevPos);
         }
         catch (out_of_range e) {
@@ -116,24 +116,17 @@ direction ECE_Centipede::moveCentipede(direction prevDir) {
         }
     }
 
-    vector<bool> choose = { false, false, false };
-    vector<direction> next = { RIGHT, DOWN, LEFT, UP };
-    if (right) { choose[0] = true; }
-    if (down) { choose[1] = true; }
-    if (left) { choose[2] = true; }
-    if (up) { choose[3] = true; }
-    choose[(int)prevDir] = false;
-
     int choice;
     srand(chrono::system_clock::now().time_since_epoch().count());
-    if (!choose[0] && !choose[1] && !choose[2]) { choice = 1; }
+    if (!choose[0] && !choose[1] && !choose[2] && !choose[3]) { choice = 0; }
     else {
-        choice = rand() % choose.size();
-        if (!choose[choice]) { choice = (choice + 1) % 3; }
-        if (!choose[choice]) { choice = (choice + 1) % 3; }
+        choice = rand() % 4;
+        if (!choose[choice]) { choice = (choice + 1) % 4; }
+        if (!choose[choice]) { choice = (choice + 1) % 4; }
+		if (!choose[choice]) { choice = (choice + 1) % 4; }
     }
 
-    switch (next[choice]) {
+    switch (choose[choice]) {
     case RIGHT:
         return updateBodyPositions(RIGHT);
     case DOWN:

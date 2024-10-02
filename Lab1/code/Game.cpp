@@ -1,13 +1,54 @@
+#include "types.h"
+#include "constants.h"
 #include "ECE_Centipede.h"
-#include "materials.h"
+#include "Game.h"
+#include <iostream>
 
 using namespace sf;
 using namespace std;
 
+std::vector<Sprite> lives(NUM_LIVES);
+direction prevDir = LEFT;
+direction movement = NONE;
+float elapsedTime = 0.f;
+bool paused = true;
+bool acceptInput = false;
+whereabouts entities = whereabouts(NUM_TOTAL_ENTITIES);
+
+Vector2f calculateOrigin(entity Entity) {
+	return Entity.spriteEntity.getLocalBounds().getSize() * 0.5f;
+}
+
+int roundByFifty(int num) {
+	return ((num + 25) / 50) * 50;
+}
+
 int main() {
 	// Create and open a window for the game
 	RenderWindow window(VideoMode(X_RESOLUTION, Y_RESOLUTION), "Centipede", Style::Default);
+
+	// Create Texture and Font objects
+	Texture textureStarship;
+	Texture textureSpider;
+	Texture textureStartup;
+	Texture textureFullMushroom;
+	Texture textureHalfMushroom;
+	Texture textureCentipedeHead;
+	Texture textureCentipedeBody;
+	Font font;
 	
+	// Prepare textures
+	textureStarship.loadFromFile("graphics/Starship.png");
+	textureSpider.loadFromFile("graphics/spider.png");
+	textureStartup.loadFromFile("graphics/startup.png");
+	textureFullMushroom.loadFromFile("graphics/Mushroom0.png");
+	textureHalfMushroom.loadFromFile("graphics/Mushroom1.png");
+	textureCentipedeHead.loadFromFile("graphics/CentipedeHead.png");
+	textureCentipedeBody.loadFromFile("graphics/CentipedeBody.png");
+
+	// Prepare font
+	font.loadFromFile("fonts/SEGOEPRB.TTF");
+
 	// Create a background sprite
 	Sprite spriteBackground;
 	spriteBackground.setColor(Color::Black);
@@ -65,7 +106,7 @@ int main() {
 		entityStarship.spriteEntity.setPosition(position);
 		entityStarship.entityType = STARSHIP;
 
-		entities.insert({ position, entityStarship });
+		entities.insert({ position, &entityStarship });
 	}
 
 	// Make spider entities
@@ -79,7 +120,7 @@ int main() {
 		entitySpider.spriteEntity.setPosition(position);
 		entitySpider.entityType = SPIDER;
 
-		entities.insert({ position, entitySpider });
+		entities.insert({ position, &entitySpider });
 	}
 
 	// Random position generator
@@ -95,23 +136,23 @@ int main() {
 		int y = mushroomPositionY(generator);
 		Vector2f position = Vector2f(roundByFifty(x), roundByFifty(y));
 
-		entityMushroom.spriteEntity.setTexture(textureSpider);
+		entityMushroom.spriteEntity.setTexture(textureFullMushroom);
 		entityMushroom.spriteEntity.setOrigin(calculateOrigin(entityMushroom));
 		entityMushroom.spriteEntity.setScale(Vector2f(2, 2));
 		entityMushroom.spriteEntity.setPosition(position);
 		entityMushroom.entityType = MUSHROOM;
 		entityMushroom.currentState = HEALTHY;
 
-		entities.insert({ position, entityMushroom });
+		entities.insert({ position, &entityMushroom });
 	} 
 
 	vector<ECE_Centipede> centipedes = { ECE_Centipede() };
 	entity entityHead;
 	entityHead.spriteEntity = centipedes[0].bodyParts[0];
-	entityHead.entityType = HEAD;
-	entityHead.currentState = HEALTHY;
+    entityHead.entityType = HEAD;
+    entityHead.currentState = HEALTHY;
 
-	entities.insert({ entityHead.spriteEntity.getPosition(), entityHead });
+	entities.insert({ entityHead.spriteEntity.getPosition(), &entityHead });
 
 	for (int i = 1; i < NUM_BODIES; i++) {
 		entity entityBody;
@@ -119,15 +160,16 @@ int main() {
 		entityBody.entityType = BODY;
 		entityBody.currentState = HEALTHY;
 
-		entities.insert({ entityBody.spriteEntity.getPosition(), entityBody });
+		entities.insert({ entityBody.spriteEntity.getPosition(), &entityBody });
 	}
 	// End of initialization
+
+	Event event;
+	Clock clock;
 
 	// Update Loop
 	while (window.isOpen())
 	{
-		Event event;
-		Clock clock;
 
 		while (window.pollEvent(event))
 		{	
@@ -192,57 +234,66 @@ int main() {
 		if (paused) {
 			window.clear();
 			window.draw(startupScreenSprite);
-		} else {
+			window.display();
+		}
+		else {
 			// Measure time
-			float deltaTime = clock.restart().asSeconds();
+			//float deltaTime = clock.restart().asSeconds();
 
 			// If enough time has passed for 5 fps:
-			if (elapsedTime >= 0.2f) {
+			cout << to_string(clock.getElapsedTime().asSeconds());
+			if (clock.getElapsedTime().asSeconds() >= 0.2f) {
 				for (int i = 0; i < centipedes.size(); i++) {
 					prevDir = centipedes[i].moveCentipede(prevDir);
-					elapsedTime = 0.f;
+				}
+				clock.restart();
+			}
+			//else {
+			//	cout << to_string(deltaTime) + '\n';
+			//	elapsedTime += deltaTime;
+			//}
+
+			/*
+			****************************************
+			Draw the scene
+			****************************************
+			*/
+			window.clear();
+
+			// Draw our game scene here
+			window.draw(spriteBackground);
+
+			// Draw the screen bottom and top
+			window.draw(screenBottom);
+			window.draw(screenTop);
+
+			// Draw the score
+			window.draw(scoreText);
+
+			// Iterate over map and draw entities
+			whereabouts::iterator it;
+			vector<pair<Vector2f, entity*>> updates;
+			for (it = entities.begin(); it != entities.end(); it++) {
+				Sprite subject = it->second->spriteEntity;
+				window.draw(subject);
+				if (it->first != it->second->spriteEntity.getPosition()) {
+					updates.push_back({ it->second->spriteEntity.getPosition(), it->second });
 				}
 			}
-			else {
-				elapsedTime += deltaTime;
+
+			for (pair<Vector2f, entity*> update : updates) {
+				entities[update.first] = update.second;
+				entities.erase(update.second->spriteEntity.getPosition());
 			}
-		}
 
-		/*
-		****************************************
-		Draw the scene
-		****************************************
-		*/
-		window.clear();
-
-		// Draw our game scene here
-		window.draw(spriteBackground);
-
-		// Draw the screen bottom and top
-		window.draw(screenBottom);
-		window.draw(screenTop);
-
-		// Draw the score
-		window.draw(scoreText);
-
-		// Iterate over map and draw entities
-		for (pair<Vector2f, entity> i : entities) {
-			window.draw(i.second.spriteEntity);
-			if (i.first != i.second.spriteEntity.getPosition()) {
-				entity temp = i.second;
-				Vector2f newPos = i.second.spriteEntity.getPosition();
-				entities[newPos] = i.second;
-				entities.erase(i.first);
+			// Draw lives in the corner
+			for (int i = 0; i < NUM_LIVES; i++) {
+				window.draw(lives[i]);
 			}
-		}
 
-		// Draw lives in the corner
-		for (int i = 0; i < NUM_LIVES; i++) {
-			window.draw(lives[i]);
+			// Show everything we just drew
+			window.display();
 		}
-
-		// Show everything we just drew
-		window.display();
 	}
 	return 0;
 }
