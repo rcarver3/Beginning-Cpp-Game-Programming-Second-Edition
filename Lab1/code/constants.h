@@ -9,7 +9,7 @@ const int NUM_TOTAL_ENTITIES = NUM_MUSHROOMS + NUM_BODIES + NUM_SHIPS + NUM_SPID
 
 const int NUM_LIVES = 3;
 
-const unsigned int X_RESOLUTION = 1080;
+const unsigned int X_RESOLUTION = 1920;
 const unsigned int Y_RESOLUTION = 1080;
 
 const float PIXEL_SCALE = 25;

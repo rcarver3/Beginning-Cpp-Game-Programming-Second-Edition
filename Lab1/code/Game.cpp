@@ -8,10 +8,6 @@ using namespace sf;
 using namespace std;
 
 std::vector<Sprite> lives(NUM_LIVES);
-direction movement = NONE;
-float elapsedTime = 0.f;
-bool paused = true;
-bool acceptInput = false;
 whereabouts entities = whereabouts(NUM_TOTAL_ENTITIES);
 
 Vector2f calculateOrigin(entity object) {
@@ -24,7 +20,7 @@ int roundByPixel(float num) {
 
 int main() {
 	// Create and open a window for the game
-	RenderWindow window(VideoMode((int)X_RESOLUTION, (int)Y_RESOLUTION), "Centipede!!", Style::Default);
+	RenderWindow window(VideoMode((int)X_RESOLUTION, (int)Y_RESOLUTION), "Centipede!!", Style::Fullscreen);
 
 	// Create Texture and Font objects
 	Texture textureStarship;
@@ -93,14 +89,12 @@ int main() {
 		lives[i].setPosition((X_RESOLUTION * 0.75 + (i * 50)), (Y_RESOLUTION * 0.02) + 20);
 	}
 
-	// Make starship entities
-	for (int i = 0; i < NUM_SHIPS; i++) {
-		entity* entityStarship = new entity(Sprite(textureStarship), STARSHIP);
-		Vector2f position = Vector2f(roundByPixel(X_RESOLUTION * 0.5), roundByPixel((Y_RESOLUTION * 0.95) + (i * 50)));
-		entityStarship->spriteEntity.setPosition(position);
-		entityStarship->spriteEntity.scale(1.5, 1.5);
-		entities.insert({ position, entityStarship });
-	}
+	// Make starship entity
+	entity* entityStarship = new entity(Sprite(textureStarship), STARSHIP);
+	Vector2f position = Vector2f(roundByPixel(X_RESOLUTION * 0.5), roundByPixel((Y_RESOLUTION * 0.95)));
+	entityStarship->spriteEntity.setPosition(position);
+	entityStarship->spriteEntity.scale(1.5, 1.5);
+	entities.insert({ position, entityStarship });
 
 	// Make spider entities
 	for (int i = 0; i < NUM_SPIDERS; i++) {
@@ -142,69 +136,57 @@ int main() {
 		entities.insert({ centipedes[0][i].spriteEntity.getPosition(), &centipedes[0][i] });
 	} // End of initialization
 
-	Event event = Event();
-	Clock clock = Clock();
+	Event event;
+	Clock timer;
 	direction prevDir = RIGHT;
 	ECE_Centipede centipedeController = ECE_Centipede();
 
-	bool acceptInput = true;
+	direction movement = NONE;
+	bool acceptInput = false;
 	bool unopened = true;
 	bool paused = true;
+
+	float deltaTime = 0;
+	float elapsedTime = 0;
 
 	// Update Loop
 	while (window.isOpen())
 	{
 		while (window.pollEvent(event))
 		{
-			if (event.type == Event::Closed) {
+			if (event.type == Event::Closed || Keyboard::isKeyPressed(Keyboard::Escape)) {
 				window.close();
 			}
-			if (!unopened && event.type == Event::KeyReleased) {
-				paused = !paused;
-				acceptInput = true;
-			}
-			if (acceptInput)
+			else if (!acceptInput)
 			{
-				if (unopened) {
-					if (Keyboard::isKeyPressed(Keyboard::Return)) {
-						unopened = false;
-						acceptInput = false;
-					}
+				if (event.type == Event::KeyReleased) {
+					acceptInput = true;
+					paused = !paused;
 				}
-				else if (!paused)
-				{
-					if (Keyboard::isKeyPressed(Keyboard::Escape))
-					{
-						movement = NONE;
-						acceptInput = false;
-					}
-					else if (Keyboard::isKeyPressed(Keyboard::Right))
-					{
-						movement = RIGHT;
-						acceptInput = false;
-					}
-					else if (Keyboard::isKeyPressed(Keyboard::Down))
-					{
-						movement = DOWN;
-						acceptInput = false;
-					}
-					else if (Keyboard::isKeyPressed(Keyboard::Left))
-					{
-						movement = LEFT;
-						acceptInput = false;
-					}
-					else if (Keyboard::isKeyPressed(Keyboard::Up))
-					{
-						movement = UP;
-						acceptInput = false;
-					}
-					else if (Keyboard::isKeyPressed(Keyboard::Escape) || Keyboard::isKeyPressed(Keyboard::Return)) {
-						acceptInput = false;
-					}
-					else {
-						movement = NONE;
-					}
-				}
+			}
+			else if (Keyboard::isKeyPressed(Keyboard::Return))
+			{
+				movement = NONE;
+				acceptInput = false;
+			}
+			else if (Keyboard::isKeyPressed(Keyboard::Right))
+			{
+				movement = RIGHT;
+			}
+			else if (Keyboard::isKeyPressed(Keyboard::Down))
+			{
+				movement = DOWN;
+			}
+			else if (Keyboard::isKeyPressed(Keyboard::Left))
+			{
+				movement = LEFT;
+			}
+			else if (Keyboard::isKeyPressed(Keyboard::Up))
+			{
+				movement = UP;
+			}
+			else {
+				movement = NONE;
 			}
 		}
 
@@ -213,18 +195,59 @@ int main() {
 		Update the scene
 		****************************************
 		*/
-		if (paused) {
+		if (paused)
+		{
 			window.clear();
 			window.draw(startupScreenSprite);
 			window.display();
 		}
-		else {
+		else 
+		{
+			deltaTime = timer.restart().asSeconds();
 			// If enough time has passed for 5 fps:
-			if (clock.getElapsedTime().asSeconds() >= 0.2f) {
+			if (elapsedTime >= 0.2f) {
 				for (int i = 0; i < centipedes.size(); i++) {
 					prevDir = centipedeController.moveCentipede(prevDir, centipedes[i]);
 				}
-				clock.restart();
+				elapsedTime = 0;
+			}
+			elapsedTime += deltaTime;
+
+			if (movement != NONE) {
+				Vector2f prevPos = entityStarship->spriteEntity.getPosition();
+				entityStarship->moved = true;
+				switch (movement) {
+				case UP:
+					entityStarship->spriteEntity.move(0, SPEED * deltaTime * -1);
+					if (entityStarship->spriteEntity.getPosition().y <= Y_RESOLUTION * 0.9)
+					{
+						entityStarship->spriteEntity.setPosition(prevPos);
+					}
+					break;
+				case DOWN:
+					entityStarship->spriteEntity.move(0, SPEED * deltaTime);
+					if (entityStarship->spriteEntity.getPosition().y >= Y_RESOLUTION)
+					{
+						entityStarship->spriteEntity.setPosition(prevPos);
+					}
+					break;
+				case LEFT:
+					entityStarship->spriteEntity.move(SPEED * deltaTime * -1, 0);
+					if (entityStarship->spriteEntity.getPosition().x <= 0)
+					{
+						entityStarship->spriteEntity.setPosition(prevPos);
+					}
+					break;
+				case RIGHT:
+					entityStarship->spriteEntity.move(SPEED * deltaTime, 0);
+					if (entityStarship->spriteEntity.getPosition().x >= X_RESOLUTION)
+					{
+						entityStarship->spriteEntity.setPosition(prevPos);
+					}
+					break;
+				default:
+					break;
+				}
 			}
 
 			/*

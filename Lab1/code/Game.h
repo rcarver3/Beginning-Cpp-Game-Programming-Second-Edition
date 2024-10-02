@@ -11,7 +11,6 @@
 
 extern std::vector<sf::Sprite> lives;
 extern direction prevDir;
-extern direction movement;
 extern float elapsedTime;
 extern whereabouts entities;
 extern whereabouts::iterator it;
